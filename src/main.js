@@ -91,9 +91,12 @@ function initProductionNotices() {
     link.addEventListener('click', showProductionNotice);
   });
 
-  // All .btn elements (Watch Live, Plan a Visit, Details, Give, etc.)
+  // All .btn elements that are local anchors (href starts with #)
   $$(Selectors.ALL_BUTTONS).forEach((btn) => {
-    btn.addEventListener('click', showProductionNotice);
+    const href = btn.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      btn.addEventListener('click', showProductionNotice);
+    }
   });
 
   // Sermon filter pills
