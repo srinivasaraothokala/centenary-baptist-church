@@ -1,0 +1,41 @@
+[
+  {
+    "id": "anniversary-151",
+    "title": "151st Church Anniversary Service",
+    "date": "14",
+    "month": "NOV",
+    "fullDate": "2026-11-14",
+    "time": "All-day",
+    "location": "Main Sanctuary",
+    "description": "Join us in celebrating 151 years of God's faithfulness to Centenary Baptist Church.",
+    "image": null,
+    "category": "Special Service",
+    "featured": true
+  },
+  {
+    "id": "communion-aug-2",
+    "title": "Communion & Family Worship Service",
+    "date": "02",
+    "month": "AUG",
+    "fullDate": "2026-08-02",
+    "time": "8:00 AM",
+    "location": "Main Sanctuary",
+    "description": "Our monthly communion service where we gather as a family to remember the Lord's sacrifice.",
+    "image": null,
+    "category": "Worship",
+    "featured": true
+  },
+  {
+    "id": "youth-meet-jul-19",
+    "title": "Telugu Baptist Youth Fellowship Meet",
+    "date": "19",
+    "month": "JUL",
+    "fullDate": "2026-07-19",
+    "time": "5:00 PM",
+    "location": "Centenary Hall",
+    "description": "A time of worship, learning, and fellowship for the young people of our church.",
+    "image": null,
+    "category": "Youth",
+    "featured": false
+  }
+]

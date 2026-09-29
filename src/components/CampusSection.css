@@ -1,0 +1,156 @@
+/* ========================================================================= */
+/* OUR CAMPUS SECTION                                                        */
+/* ========================================================================= */
+
+.campus-section {
+  width: 100%;
+}
+
+.campus-section.full-section {
+  padding: 80px 0;
+  background-color: #FAF5E9; /* Parchment */
+}
+
+.campus-section.subsection {
+  padding-top: 60px;
+}
+
+.campus-header {
+  margin-bottom: 48px;
+}
+
+.campus-subheading {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: #6E1F26; /* Maroon */
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.campus-subtitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #3F6B4A; /* Green */
+  font-style: italic;
+  margin: 0;
+}
+
+.campus-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.campus-card {
+  display: block;
+  text-decoration: none;
+  background-color: #FFFDF8; /* Cream */
+  border: 1px solid #E7DCC3; /* Sandstone */
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+}
+
+.campus-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+  border-color: #B6893F; /* Brass accent on hover */
+}
+
+.campus-card-img {
+  width: 100%;
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid #E7DCC3;
+  transition: transform 0.5s ease;
+}
+
+.campus-card:hover .campus-card-img {
+  transform: scale(1.05);
+}
+
+.campus-card-content {
+  padding: 24px;
+  background-color: #FFFDF8; /* ensure content background covers zoomed image */
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.campus-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #6E1F26; /* Maroon */
+  margin: 0 0 12px 0;
+  transition: color 0.3s ease;
+}
+
+.campus-card-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #241F1A; /* Ink */
+  margin: 0 0 16px 0;
+  flex-grow: 1;
+}
+
+.campus-card-action {
+  font-size: 14px;
+  font-weight: 600;
+  color: #B6893F; /* Brass */
+  transition: color 0.3s ease;
+}
+
+.campus-card:hover .campus-card-action {
+  color: #6E1F26; /* Maroon */
+}
+
+.campus-footer {
+  text-align: center;
+  margin-top: 48px;
+}
+
+.btn-explore-campus {
+  font-weight: 600;
+  color: #6E1F26;
+  text-decoration: none;
+  font-size: 16px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.btn-explore-campus:hover {
+  border-color: #6E1F26;
+}
+
+/* Animations */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .campus-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .campus-section.full-section {
+    padding: 60px 0;
+  }
+  .campus-grid {
+    grid-template-columns: 1fr;
+  }
+}

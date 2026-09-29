@@ -1,0 +1,233 @@
+/* ========================================================================= */
+/* FAITH & HISTORY SECTION (FaithfulnessTimeline)                            */
+/* ========================================================================= */
+
+.faith-history-section {
+  position: relative;
+  background-image: url('/assets/faith_history_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: scroll;
+  padding: 100px 0;
+  overflow: hidden;
+  color: #241F1A;
+}
+
+.fh-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(250, 245, 233, 0.85); /* Parchment translucent overlay */
+  z-index: 1;
+}
+
+.fh-wrap {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ========================================================================= */
+/* DESKTOP 2-COLUMN LAYOUT */
+/* ========================================================================= */
+.fh-desktop-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 80px;
+}
+
+/* ========================================================================= */
+/* LEFT COLUMN: HISTORY */
+/* ========================================================================= */
+.fh-eyebrow {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #6E1F26;
+  margin-bottom: 12px;
+}
+
+.fh-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  color: #4C151A;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+.fh-accent-line {
+  width: 60px;
+  height: 2px;
+  background-color: #B6893F;
+  margin-bottom: 32px;
+}
+
+.fh-intro {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #241F1A;
+  margin-bottom: 32px;
+}
+
+.fh-emunah-quote {
+  border-left: 3px solid #B6893F;
+  background-color: rgba(255, 253, 248, 0.6); /* Soft Cream */
+  padding: 32px 40px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.fh-emunah-quote p {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.6;
+  color: #4C151A;
+  margin: 0;
+}
+
+.fh-story {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #241F1A;
+  margin-bottom: 24px;
+}
+
+.fh-visual-moment {
+  margin-top: 60px;
+  text-align: center;
+  padding: 40px 0;
+  border-top: 1px solid #E7DCC3;
+  border-bottom: 1px solid #E7DCC3;
+}
+
+.fh-vm-years {
+  font-size: 16px;
+  letter-spacing: 4px;
+  color: #B6893F;
+  margin-bottom: 8px;
+}
+
+.fh-vm-150 {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  color: #4C151A;
+  letter-spacing: 2px;
+}
+
+/* ========================================================================= */
+/* RIGHT COLUMN: MILESTONES */
+/* ========================================================================= */
+.fh-subheading {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  color: #6E1F26;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.fh-timeline-container {
+  position: relative;
+  padding-left: 30px;
+}
+
+.fh-timeline-line {
+  position: absolute;
+  top: 10px;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+  background-color: #E7DCC3;
+}
+
+.fh-milestone {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.fh-milestone:last-child {
+  margin-bottom: 0;
+}
+
+.fh-m-dot {
+  position: absolute;
+  left: -30px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #B6893F;
+  border: 3px solid #FAF5E9;
+  box-shadow: 0 0 0 1px #B6893F;
+}
+
+.fh-m-year {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #B6893F;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.fh-m-desc {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #241F1A;
+}
+
+
+
+/* ========================================================================= */
+/* ANIMATIONS */
+/* ========================================================================= */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========================================================================= */
+/* RESPONSIVE DESIGN */
+/* ========================================================================= */
+@media (max-width: 1024px) {
+  .fh-desktop-grid {
+    gap: 40px;
+  }
+  .fh-campus-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .faith-history-section {
+    padding: 60px 0;
+  }
+  .fh-overlay {
+    background-color: rgba(250, 245, 233, 0.92); /* Stronger overlay on mobile */
+  }
+  .fh-desktop-grid {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  .fh-main-title {
+    font-size: 36px;
+  }
+  .fh-emunah-quote {
+    padding: 24px;
+  }
+  .fh-emunah-quote p {
+    font-size: 18px;
+  }
+  .fh-campus-grid {
+    grid-template-columns: 1fr;
+  }
+}
