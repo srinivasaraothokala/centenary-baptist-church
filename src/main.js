@@ -226,9 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize i18n FIRST (reads localStorage, wires buttons)
   initI18n();
 
-  // Render navigation and footer in chosen language
+  // Render navigation in chosen language
   renderNavigation();
-  renderFooter();
 
   initModals();
   initScrollEffects();
@@ -261,10 +260,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   new FinalCTASection('#home-final-cta-section');
 
-  // Re-render navigation + footer whenever language changes
+  // Re-render navigation whenever language changes
   window.addEventListener('langChange', () => {
     renderNavigation();
-    renderFooter();
   });
 
   // Hide the page loader immediately — page is ready to show
