@@ -1,6 +1,7 @@
 import { API_BASE } from '../apiConfig.js';
 import { supabaseClient } from '../supabaseFrontendClient.js';
 import { AdminLayout } from './AdminLayout.js';
+import './admin.css';
 
 export class AdminContacts {
   constructor(containerId) {
@@ -18,13 +19,18 @@ export class AdminContacts {
 
   async fetchContacts() {
     try {
-      const res = await fetch(this.API_URL);
+      const res = await fetch(this.API_URL, { headers: await this.authHeaders() });
       if (res.ok) {
         this.contacts = await res.json();
         this.renderUI();
+      } else {
+        const list = this.container.querySelector('#admin-contacts-list');
+        if (list) list.innerHTML = '<tr><td colspan="4"><div class="admin-empty" style="color:#991b1b;">Failed to load messages. Please try again.</div></td></tr>';
       }
     } catch (err) {
       console.error('Failed to load contacts', err);
+      const list = this.container.querySelector('#admin-contacts-list');
+      if (list) list.innerHTML = '<tr><td colspan="4"><div class="admin-empty" style="color:#991b1b;">Network error. Please check your connection.</div></td></tr>';
     }
   }
 

@@ -1,7 +1,7 @@
 import express from 'express';
 import nodemailer from 'nodemailer';
 import { supabase } from './supabaseClient.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 // Nodemailer Transporter
@@ -16,9 +16,9 @@ const transporter = nodemailer.createTransport({
 });
 
 // GET /api/contact - Admin view all messages
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { data, error } = await supabase.from('contacts').select('*').order('created_at', { ascending: false }).limit(200);
+    const { data, error } = await supabase.from('contacts').select('*').order('date', { ascending: false }).limit(200);
     if (error) throw error;
     res.json(data);
   } catch (error) {

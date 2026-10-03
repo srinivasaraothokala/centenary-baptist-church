@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { supabase } from './supabaseClient.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 const router = express.Router();
 import crypto from 'crypto';
 
@@ -20,7 +20,7 @@ const upload = multer({
   }
 });
 
-router.post('/', requireAuth, (req, res) => {
+router.post('/', requireAuth, requireAdmin, (req, res) => {
   upload.single('file')(req, res, async (err) => {
     if (err) {
       if (err.message === 'INVALID_FILE_TYPE') {

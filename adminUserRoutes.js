@@ -1,7 +1,7 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient.js';
-import { requireAuth, requireSuperAdmin } from './authMiddleware.js';
+import { requireAuth, requireAdmin, requireSuperAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 // Admin client with full privileges (service key)
@@ -14,7 +14,7 @@ const supabaseAdmin = createClient(
 
 // ─── GET ALL ADMIN USERS (Super Admin only) ────────────────────────────────
 // GET /api/admin-users
-router.get('/', requireAuth, requireSuperAdmin, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
     if (error) throw error;
@@ -39,7 +39,7 @@ router.get('/', requireAuth, requireSuperAdmin, async (req, res) => {
 
 // ─── CREATE NEW ADMIN (Super Admin only) ──────────────────────────────────
 // POST /api/admin-users
-router.post('/', requireAuth, requireSuperAdmin, async (req, res) => {
+router.post('/', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     if (!name || !email || !password) {
@@ -70,7 +70,7 @@ router.post('/', requireAuth, requireSuperAdmin, async (req, res) => {
 
 // ─── UPDATE ADMIN (Super Admin only) ─────────────────────────────────────
 // PUT /api/admin-users/:id
-router.put('/:id', requireAuth, requireSuperAdmin, async (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { name, email, password, role, is_active } = req.body;
     const updates = { user_metadata: { name, role, is_active } };
@@ -87,7 +87,7 @@ router.put('/:id', requireAuth, requireSuperAdmin, async (req, res) => {
 
 // ─── DELETE ADMIN (Super Admin only) ─────────────────────────────────────
 // DELETE /api/admin-users/:id
-router.delete('/:id', requireAuth, requireSuperAdmin, async (req, res) => {
+router.delete('/:id', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     // Prevent deleting yourself
     if (req.params.id === req.user.id) {
@@ -103,7 +103,7 @@ router.delete('/:id', requireAuth, requireSuperAdmin, async (req, res) => {
 
 // ─── TOGGLE ACTIVE STATUS (Super Admin only) ──────────────────────────────
 // PATCH /api/admin-users/:id/toggle-active
-router.patch('/:id/toggle-active', requireAuth, requireSuperAdmin, async (req, res) => {
+router.patch('/:id/toggle-active', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { is_active } = req.body;
     const { data: { user: existing }, error: fetchErr } = await supabaseAdmin.auth.admin.getUserById(req.params.id);
@@ -121,7 +121,7 @@ router.patch('/:id/toggle-active', requireAuth, requireSuperAdmin, async (req, r
 
 // ─── UPDATE OWN PROFILE ────────────────────────────────────────────────────
 // PATCH /api/admin-users/profile/me
-router.patch('/profile/me', requireAuth, async (req, res) => {
+router.patch('/profile/me', requireAuth, requireAdmin, async (req, res) => {
   try {
     const role = req.user.user_metadata?.role;
     const { password, email } = req.body;

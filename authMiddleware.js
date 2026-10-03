@@ -24,6 +24,14 @@ export const requireAuth = async (req, res, next) => {
   }
 };
 
+export const requireAdmin = (req, res, next) => {
+  const role = req.user?.user_metadata?.role;
+  if (role !== 'admin' && role !== 'super_admin') {
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
+  }
+  next();
+};
+
 export const requireSuperAdmin = (req, res, next) => {
   if (req.user?.user_metadata?.role !== 'super_admin') {
     return res.status(403).json({ error: 'Forbidden: Super Admin access required' });

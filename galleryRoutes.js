@@ -1,7 +1,7 @@
 import express from 'express';
 import { supabase } from './supabaseClient.js';
 import { logAudit } from './logAudit.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { title, image_url, category } = req.body;
     const { data, error } = await supabase.from('gallery').insert([{ title, image_url, category }]).select();
@@ -31,7 +31,7 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { error } = await supabase.from('gallery').delete().eq('id', id);

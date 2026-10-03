@@ -20,15 +20,21 @@ export class FirstTimeVisitorModal {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
         <div class="vm-image-col">
-          <img src="/modal_church.jpg" alt="Centenary Baptist Church" />
+          <img src="/modal_church.jpg" alt="Centenary Baptist Church exterior — a beautiful historic stone church building" onerror="this.style.display='none'" />
           <div class="vm-image-overlay">
+            <span class="vm-overlay-welcome">Welcome Home</span>
             <h3 class="vm-overlay-title">Centenary Baptist Church</h3>
+            <hr class="vm-overlay-divider" />
             <p class="vm-overlay-sub">Est. 1875</p>
           </div>
         </div>
         <div class="vm-form-col">
           <div class="vm-form-container">
             <div class="vm-header">
+              <div class="vm-header-eyebrow">
+                <span class="vm-header-line"></span>
+                <span>Plan Your Visit</span>
+              </div>
               <h2 id="vm-title">Welcome, We're Glad You're Here</h2>
               <p>We'd love to get to know you and help you feel at home at Centenary Baptist Church.</p>
             </div>
@@ -91,6 +97,7 @@ export class FirstTimeVisitorModal {
                 I'M PLANNING TO VISIT
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
               </button>
+              <div id="vm-submit-error" role="alert" aria-live="polite" style="display:none;margin-top:14px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;color:#b91c1c;font-size:13px;line-height:1.5;"></div>
             </form>
           </div>
         </div>
@@ -182,7 +189,7 @@ export class FirstTimeVisitorModal {
       isValid = false;
     }
 
-    if (email.value.trim() && !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email.value)) {
+    if (email.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
       email.closest('.vm-group').classList.add('error');
       isValid = false;
     }
@@ -199,6 +206,10 @@ export class FirstTimeVisitorModal {
     this.submitBtn.innerHTML = 'Submitting...';
     this.submitBtn.disabled = true;
 
+    // Clear any previous submit-level error
+    const errEl = this.overlay.querySelector('#vm-submit-error');
+    if (errEl) errEl.style.display = 'none';
+
     const data = {
       firstName: this.inputs.fname.value.trim(),
       lastName: this.inputs.lname.value.trim(),
@@ -214,8 +225,11 @@ export class FirstTimeVisitorModal {
       await visitorService.submitVisitor(data);
       this.showSuccess(data.firstName);
     } catch (error) {
-      console.error('Submission failed', error);
-      alert('There was a problem submitting the form. Please try again.');
+      console.error('[VisitorModal] Submission failed');
+      if (errEl) {
+        errEl.textContent = 'Unable to submit your information. Please try again.';
+        errEl.style.display = 'block';
+      }
       this.submitBtn.innerHTML = originalText;
       this.submitBtn.disabled = false;
     }

@@ -10,7 +10,6 @@ export const visitorService = {
    * @returns {Promise<Object>} Resolves when submission is successful
    */
   async submitVisitor(data) {
-    console.log('[VisitorService] Submitting new visitor:', data);
     try {
       const response = await fetch(`${API_BASE}/visitor`, {
         method: 'POST',

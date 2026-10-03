@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { supabase } from './supabaseClient.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -37,7 +37,7 @@ router.get('/config', async (req, res) => {
 });
 
 // POST Config (Update note and optional QR code)
-router.post('/config', requireAuth, (req, res) => {
+router.post('/config', requireAuth, requireAdmin, (req, res) => {
   upload.single('qrCode')(req, res, async (err) => {
     if (err) {
       if (err.message === 'INVALID_FILE_TYPE') {
@@ -99,7 +99,7 @@ router.post('/config', requireAuth, (req, res) => {
 });
 
 // GET Donations (Admin)
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('donations').select('*');
     if (error) throw error;

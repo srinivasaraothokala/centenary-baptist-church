@@ -26,3 +26,12 @@ dist-ssr
 *.sw?
 
 database.sqlite
+
+# Temporary development/patch scripts
+patch_*.cjs
+patch_*.js
+fix_*.cjs
+fix_*.js
+verify_*.cjs
+verify_*.js
+seed_*.cjs

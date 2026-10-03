@@ -62,7 +62,7 @@ export class GalleryPage {
       <style>
         .gal-hero {
           position: relative;
-          background: url('/gallery_banner_bg.png') center center / cover no-repeat;
+          background: url('/new_gallery_image.png') center center / cover no-repeat;
           padding: 100px 24px 80px;
           text-align: center;
           overflow: hidden;

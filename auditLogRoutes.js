@@ -1,11 +1,11 @@
 import express from 'express';
 import { supabase } from './supabaseClient.js';
 import { logAudit } from './logAudit.js';
-import { requireAuth, requireSuperAdmin } from './authMiddleware.js';
+import { requireAuth, requireAdmin, requireSuperAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 // GET /api/audit-logs — fetch logs with optional filters
-router.get('/', requireAuth, requireSuperAdmin, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { action, entity_type, limit = 200 } = req.query;
 
@@ -27,7 +27,7 @@ router.get('/', requireAuth, requireSuperAdmin, async (req, res) => {
 });
 
 // DELETE /api/audit-logs — clear all logs (super admin only)
-router.delete('/', requireAuth, requireSuperAdmin, async (req, res) => {
+router.delete('/', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { error } = await supabase.from('audit_logs').delete().neq('id', 0);
     if (error) throw error;

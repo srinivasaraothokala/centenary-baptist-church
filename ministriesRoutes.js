@@ -1,7 +1,7 @@
 import express from 'express';
 import { supabase } from './supabaseClient.js';
 import { logAudit } from './logAudit.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 // Helper to auto-generate a slug from title
@@ -51,7 +51,7 @@ router.get('/:slug', async (req, res) => {
 });
 
 // POST /api/ministries — create a new ministry
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const {
       title, short_desc, full_desc, icon, image_url,
@@ -85,7 +85,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // PUT /api/ministries/:id — update a ministry
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const {
       title, short_desc, full_desc, icon, image_url,
@@ -120,7 +120,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // PATCH /api/ministries/reorder — bulk update sort_order for drag-and-drop
-router.patch('/reorder', requireAuth, async (req, res) => {
+router.patch('/reorder', requireAuth, requireAdmin, async (req, res) => {
   try {
     // req.body = [{ id: 1, sort_order: 1 }, { id: 3, sort_order: 2 }, ...]
     const updates = req.body;
@@ -135,7 +135,7 @@ router.patch('/reorder', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/ministries/:id — delete a ministry
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('ministries')

@@ -1,6 +1,6 @@
 import express from 'express';
 import { supabase } from './supabaseClient.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 // POST /api/visitor - Submit new visitor form
@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/visitor - Admin view all visitors
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('visitors').select('*').order('created_at', { ascending: false }).limit(200);
     if (error) throw error;

@@ -121,7 +121,8 @@ export const churchData = {
     {
       name: "Rev. Dr. M. Purushotham",
       role: "Senior Pastor",
-      image: null
+      image_url: "/images/pastor-purushotham.jpg",
+      bio: "Rev. Dr. M. Purshotham has been faithfully serving the Lord at Centenary Baptist Church, Secunderabad for the past 23 years, actively ministering through Telugu, Hindi and outreach ministries. Having come to know Jesus Christ through God’s grace and His Word, he has devoted his life to serving Christ and His people, witnessing His faithfulness throughout his journey.<br><br>He is blessed with a loving family, his wife, Mrs. Helen, who serves in the medical ministry, and their three children, Victor Paul, Dr. Methuselah and Hadassah Sharon. His elder son Victor Paul is married to Richitha Shuneeya, and they are blessed with a son, Ronen Penuel Paul."
     },
     {
       name: "Rev. Dr. V. Satyaranjan",
@@ -408,12 +409,13 @@ export const churchData = {
       btnKey: "navPlanVisit",
       btnHref: "#/visit/plan"
     },
-    bottomBar: {
-      copyrightKey: "footerCopyright",
-      links: [
-        { label: "footerPrivacy", href: "#/privacy-policy" },
-        { label: "footerTerms", href: "#/terms" }
-      ]
-    }
+      bottomBar: {
+        copyrightKey: "footerCopyright",
+        links: [
+          { label: "footerPrivacy", href: "#/privacy-policy" },
+          { label: "footerTerms", href: "#/terms" },
+          { label: "Cookie Settings", href: "#cookie-settings" }
+        ]
+      }
   }
 };

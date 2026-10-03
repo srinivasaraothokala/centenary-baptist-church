@@ -1,7 +1,7 @@
 import express from 'express';
 import { supabase } from './supabaseClient.js';
 import { logAudit } from './logAudit.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 // GET /api/leadership — all leaders ordered by category then order_index
@@ -42,7 +42,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/leadership — create a new leader
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { name, role, category, bio, image_url, order_index, is_active } = req.body;
 
@@ -69,7 +69,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // PUT /api/leadership/:id — update a leader
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { name, role, category, bio, image_url, order_index, is_active } = req.body;
 
@@ -97,7 +97,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/leadership/:id — delete a leader
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data: existing } = await supabase.from('leadership').select('name, role').eq('id', req.params.id).single();
 

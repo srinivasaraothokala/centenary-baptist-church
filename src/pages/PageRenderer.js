@@ -6,6 +6,7 @@ import { SermonsPage } from './SermonsPage.js';
 export class PageRenderer {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
+    this._bindEventRegistration();
   }
 
   async render(path) {
@@ -115,7 +116,7 @@ export class PageRenderer {
             .about-hero {
               position: relative;
               min-height: 220px;
-              background: url('/about_church_bg.jpg') center center / cover no-repeat;
+              background: url('/new_about_image.png') center center / cover no-repeat;
               display: flex;
               align-items: center;
               overflow: hidden;
@@ -220,7 +221,7 @@ export class PageRenderer {
             .worship-hero {
               position: relative;
               min-height: 280px;
-              background: url('/worship_banner_bg.png') center center / cover no-repeat;
+              background: url('/new_worship_image.png') center center / cover no-repeat;
               display: flex;
               align-items: center;
               overflow: hidden;
@@ -336,7 +337,7 @@ export class PageRenderer {
             .events-hero {
               position: relative;
               min-height: 280px;
-              background: url('/event_banner_bg.png') center center / cover no-repeat;
+              background: url('/new_worship_image.png') center center / cover no-repeat;
               display: flex;
               align-items: center;
               overflow: hidden;
@@ -415,7 +416,7 @@ export class PageRenderer {
       } else {
         // ── Default Page Header ────────────────────────────────────────────
         this.container.innerHTML = `
-          <div class="page-header" style="background-image: linear-gradient(rgba(27, 39, 51, 0.82), rgba(27, 39, 51, 0.82)), url('/assets/faith_history_bg.jpg'); background-size: cover; background-position: center;">
+          <div class="page-header" style="background-image: linear-gradient(rgba(27, 39, 51, 0.82), rgba(27, 39, 51, 0.82)), url('/new_worship_image.png'); background-size: cover; background-position: center;">
             <div class="wrap text-center fade-in-up">
               <h1 class="page-title">${title}</h1>
               <div class="page-breadcrumb">Home / ${title}</div>
@@ -861,10 +862,106 @@ export class PageRenderer {
         </div>
         
         <div class="event-actions" style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--cream);">
-          <a href="#" class="btn btn-solid-maroon" onclick="alert('Registration flow to be implemented'); return false;">Register Now</a>
+          ${event.registration_enabled ? `
+            <button class="btn btn-solid-maroon" onclick="window.openEventRegistration('${event.id}', '${event.title.replace(/'/g, "\\'")}')">Register Now</button>
+          ` : ''}
         </div>
       </div>
     `;
+  }
+
+  _bindEventRegistration() {
+    window.openEventRegistration = (eventId, eventTitle) => {
+      let modal = document.getElementById('event-reg-modal');
+      if (modal) modal.remove();
+
+      const html = `
+        <div id="event-reg-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center;">
+          <div style="background:white; padding:32px; border-radius:12px; width:90%; max-width:500px; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+            <button onclick="document.getElementById('event-reg-modal').remove()" style="position:absolute; top:16px; right:16px; background:none; border:none; font-size:28px; cursor:pointer; line-height:1; color:#64748b;">&times;</button>
+            <h2 style="margin-top:0; color:var(--primary-maroon); font-family:'Playfair Display',serif; font-size:24px; margin-bottom:8px;">Register for Event</h2>
+            <p style="color:#64748b; margin-bottom:24px; font-weight:600;">${eventTitle}</p>
+            
+            <form id="event-reg-form" style="display:flex; flex-direction:column; gap:16px;">
+              <div>
+                <label style="display:block; font-weight:600; font-size:14px; margin-bottom:6px; color:#374151;">Full Name *</label>
+                <input type="text" name="full_name" required style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit;">
+              </div>
+              <div>
+                <label style="display:block; font-weight:600; font-size:14px; margin-bottom:6px; color:#374151;">Email Address *</label>
+                <input type="email" name="email" required style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit;">
+              </div>
+              <div>
+                <label style="display:block; font-weight:600; font-size:14px; margin-bottom:6px; color:#374151;">Phone Number *</label>
+                <input type="tel" name="phone" required style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit;">
+              </div>
+              <div>
+                <label style="display:block; font-weight:600; font-size:14px; margin-bottom:6px; color:#374151;">Number of Attendees</label>
+                <input type="number" name="attendee_count" min="1" value="1" required style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit;">
+              </div>
+              <div>
+                <label style="display:block; font-weight:600; font-size:14px; margin-bottom:6px; color:#374151;">Additional Notes (Optional)</label>
+                <textarea name="notes" rows="3" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:6px; font-family:inherit; resize:vertical;"></textarea>
+              </div>
+              
+              <div id="reg-msg" style="display:none; padding:12px; border-radius:6px; font-size:14px; margin-top:8px;"></div>
+              
+              <button type="submit" class="btn btn-solid-maroon" style="width:100%; margin-top:8px;">Submit Registration</button>
+            </form>
+          </div>
+        </div>
+      `;
+
+      document.body.insertAdjacentHTML('beforeend', html);
+      
+      const form = document.getElementById('event-reg-form');
+      const msg = document.getElementById('reg-msg');
+      const btn = form.querySelector('button[type="submit"]');
+      
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+        msg.style.display = 'none';
+        
+        try {
+          const res = await fetch(`/api/events/${eventId}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              full_name: form.full_name.value,
+              email: form.email.value,
+              phone: form.phone.value,
+              attendee_count: form.attendee_count.value,
+              notes: form.notes.value
+            })
+          });
+          
+          const data = await res.json();
+          
+          if (res.ok) {
+            msg.style.display = 'block';
+            msg.style.backgroundColor = '#dcfce7';
+            msg.style.color = '#166534';
+            msg.textContent = 'Registration successful! Thank you.';
+            form.reset();
+            setTimeout(() => {
+              const m = document.getElementById('event-reg-modal');
+              if (m) m.remove();
+            }, 2500);
+          } else {
+            throw new Error(data.error || 'Failed to register.');
+          }
+        } catch (err) {
+          msg.style.display = 'block';
+          msg.style.backgroundColor = '#fee2e2';
+          msg.style.color = '#991b1b';
+          msg.textContent = err.message;
+          btn.textContent = 'Submit Registration';
+          btn.disabled = false;
+        }
+      });
+    };
   }
 
 

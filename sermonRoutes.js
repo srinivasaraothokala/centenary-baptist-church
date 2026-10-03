@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 const router = express.Router();
 
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 // GET /api/sermons
 router.get('/', async (req, res) => {
   try {
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/sermons
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const newSermon = { ...req.body, id: crypto.randomUUID() };
     const { data, error } = await supabase.from('sermons').insert([newSermon]).select();
@@ -36,7 +36,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // PUT /api/sermons/:id
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('sermons')
@@ -56,7 +56,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/sermons/:id
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('sermons').delete().eq('id', req.params.id).select();
     if (error) throw error;

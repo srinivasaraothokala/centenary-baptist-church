@@ -143,20 +143,23 @@ export class AdminSermons {
     const formData = new FormData();
     formData.append('file', file);
     try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
       const uploadRes = await fetch(`${API_BASE}/upload`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: { Authorization: `Bearer ${session?.access_token}` }
       });
       if (uploadRes.ok) {
         const uploadData = await uploadRes.json();
         this.uploadedThumbnailUrl = uploadData.url;
         this.renderThumbnailPreview();
       } else {
-        alert('Image upload failed');
+        const body = await uploadRes.json().catch(() => ({}));
+        alert(body.error || 'Image upload failed');
       }
     } catch (err) {
       console.error(err);
-      alert('Upload error');
+      alert('Upload error. Please check your connection and try again.');
     }
   }
 
@@ -567,12 +570,26 @@ export class AdminSermons {
         .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; }
         .btn-danger:hover { background: #fecaca; }
 
+        /* Banner */
+        .sermons-banner-wrap { margin-bottom: 28px; border-radius: 14px; overflow: hidden; position: relative; }
+        .sermons-banner-wrap img { width: 100%; height: 220px; object-fit: cover; object-position: center; display: block; }
+        .sermons-banner-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.05) 60%); display: flex; align-items: center; justify-content: space-between; padding: 0 36px; }
+        .sermons-banner-text h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: white; margin: 0 0 6px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .sermons-banner-text p { font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+
         /* Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
-        .stat-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .stat-icon { width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-        .stat-num { font-size: 28px; font-weight: 700; color: var(--text-main); line-height: 1; margin-bottom: 4px; }
-        .stat-label { font-size: 13px; color: var(--text-sec); font-weight: 500; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 28px; }
+        .stat-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); position: relative; overflow: hidden; }
+        .stat-card::after { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; border-radius: 12px 0 0 12px; }
+        .stat-card-total::after { background: #9B1023; }
+        .stat-card-pub::after { background: #16805B; }
+        .stat-card-feat::after { background: #b47a18; }
+        .stat-card-draft::after { background: #6366f1; }
+        .stat-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+        .stat-num { font-size: 36px; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 5px; letter-spacing: -1px; }
+        .stat-label { font-size: 11px; color: var(--text-sec); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+        @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } .sermons-banner-wrap img { height: 160px; } }
 
         /* Filters */
         .filter-bar { display: flex; gap: 16px; margin-bottom: 24px; }
@@ -730,35 +747,48 @@ export class AdminSermons {
           </header>
 
           <div class="cms-content">
-            <div class="page-header">
-              <div class="page-title-row">
-                <div class="page-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                </div>
-                <div class="page-title">
-                  <h2>Sermons & Videos</h2>
+
+            <!-- Sermons Banner -->
+            <div class="sermons-banner-wrap">
+              <img src="/images/sermons-banner.png" alt="Sermons and Videos" draggable="false">
+              <div class="sermons-banner-overlay">
+                <div class="sermons-banner-text">
+                  <h2>Sermons &amp; Videos</h2>
                   <p>Manage sermons, messages, worship videos, and other YouTube content.</p>
                 </div>
+                <button class="btn-primary" id="btn-add-video" style="flex-shrink:0;">+ Add Video</button>
               </div>
-              <button class="btn-primary" id="btn-add-video">+ Add Video</button>
             </div>
 
+            <!-- Premium Stats Cards -->
             <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-icon" style="background: #fdf2f2; color: #ef4444;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div>
-                <div><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Videos</div></div>
+              <div class="stat-card stat-card-total">
+                <div class="stat-icon" style="background:#fdf0f1; color:#9B1023;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <div class="stat-num" id="stat-total">0</div>
+                <div class="stat-label">Total Videos</div>
               </div>
-              <div class="stat-card">
-                <div class="stat-icon" style="background: #e6f6ee; color: #16805B;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                <div><div class="stat-num" id="stat-published">0</div><div class="stat-label">Published</div></div>
+              <div class="stat-card stat-card-pub">
+                <div class="stat-icon" style="background:#e6f6ee; color:#16805B;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="stat-num" id="stat-published">0</div>
+                <div class="stat-label">Published</div>
               </div>
-              <div class="stat-card">
-                <div class="stat-icon" style="background: #fdf5e6; color: #b47a18;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
-                <div><div class="stat-num" id="stat-featured">0</div><div class="stat-label">Featured</div></div>
+              <div class="stat-card stat-card-feat">
+                <div class="stat-icon" style="background:#fdf5e6; color:#b47a18;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div class="stat-num" id="stat-featured">0</div>
+                <div class="stat-label">Featured</div>
               </div>
-              <div class="stat-card">
-                <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-                <div><div class="stat-num" id="stat-drafts">0</div><div class="stat-label">Drafts</div></div>
+              <div class="stat-card stat-card-draft">
+                <div class="stat-icon" style="background:#f0f0ff; color:#6366f1;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div class="stat-num" id="stat-drafts">0</div>
+                <div class="stat-label">Drafts</div>
               </div>
             </div>
 

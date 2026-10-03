@@ -1,7 +1,7 @@
 import express from 'express';
 import { supabase } from './supabaseClient.js';
 import { logAudit } from './logAudit.js';
-import { requireAuth } from './authMiddleware.js';
+import { requireAuth, requireAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 function toSlug(title) {
@@ -48,7 +48,7 @@ router.get('/:slug', async (req, res) => {
 });
 
 // POST /api/campus — create new campus location
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { title, short_desc, full_desc, icon, image_url, address, map_url, phone, is_active, sort_order } = req.body;
     const slug = toSlug(title);
@@ -72,7 +72,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // PUT /api/campus/:id — update campus location
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { title, short_desc, full_desc, icon, image_url, address, map_url, phone, is_active, sort_order } = req.body;
     const updateData = { short_desc, full_desc, icon, image_url, address, map_url, phone, is_active, sort_order };
@@ -88,7 +88,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/campus/:id
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('campus').delete().eq('id', req.params.id).select();
     if (error) throw error;

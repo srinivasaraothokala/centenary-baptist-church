@@ -1,7 +1,7 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient.js';
-import { requireAuth, requireSuperAdmin } from './authMiddleware.js';
+import { requireAuth, requireAdmin, requireSuperAdmin } from './authMiddleware.js';
 const router = express.Router();
 
 // ── GET /api/settings (public — website reads settings) ─────────────────────
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 });
 
 // ── PUT /api/settings (Super Admin only) ────────────────────────────────────
-router.put('/', requireAuth, requireSuperAdmin, async (req, res) => {
+router.put('/', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { settings } = req.body;
     if (!settings || typeof settings !== 'object') {
@@ -51,7 +51,7 @@ router.put('/', requireAuth, requireSuperAdmin, async (req, res) => {
 });
 
 // ── PATCH /api/settings/:section (update one section) ───────────────────────
-router.patch('/:section', requireAuth, requireSuperAdmin, async (req, res) => {
+router.patch('/:section', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) => {
   try {
     const { section } = req.params;
     const sectionData = req.body;

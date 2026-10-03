@@ -492,6 +492,7 @@ export class GiveSection {
                 <button type="submit" class="submit-btn">
                   <span>Submit Details</span>
                 </button>
+                <div id="give-error-msg" role="alert" aria-live="polite" style="display:none;margin-top:12px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;color:#b91c1c;font-size:13px;line-height:1.5;"></div>
                 <div class="form-footer-note">All information is optional. You can also give anonymously using the QR code.</div>
               </form>
               <div id="give-success-msg">
@@ -622,6 +623,7 @@ export class GiveSection {
     const form = e.target;
     const btn = form.querySelector('button');
     const msgBox = this.container.querySelector('#give-success-msg');
+    const errBox = this.container.querySelector('#give-error-msg');
     
     const data = {
       name: form.name.value,
@@ -634,6 +636,7 @@ export class GiveSection {
     btn.disabled = true;
     btn.querySelector('span').textContent = 'Submitting...';
     msgBox.style.display = 'none';
+    if (errBox) errBox.style.display = 'none';
 
     try {
       const res = await fetch(this.API_URL, {
@@ -647,15 +650,18 @@ export class GiveSection {
         form.style.display = 'none';
         msgBox.style.display = 'block';
       } else {
-        alert('Failed to submit your details. Please try again later.');
+        if (errBox) {
+          errBox.textContent = 'Unable to submit your details. Please try again.';
+          errBox.style.display = 'block';
+        }
       }
     } catch (err) {
-      console.error(err);
-      alert('An error occurred while submitting. Please check your connection and try again.');
-    } finally {
-      if (!btn.disabled) {
-        // If form didn't hide (i.e. error occurred), re-enable the button
+      console.error('[Donations] Submission error');
+      if (errBox) {
+        errBox.textContent = 'Unable to connect. Please check your internet connection and try again.';
+        errBox.style.display = 'block';
       }
+    } finally {
       btn.disabled = false;
       btn.querySelector('span').textContent = 'Submit Details';
     }
