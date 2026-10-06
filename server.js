@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,7 +78,7 @@ app.use(helmet({
 // If CORS_ORIGIN is missing in production, the server refuses to start
 // rather than silently serving with broken/blocked API access.
 // In development, localhost origins are allowed automatically.
-const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_render';
+const isProduction = process.env.NODE_ENV === 'production';
 
 if (isProduction && !process.env.CORS_ORIGIN) {
   console.error('[FATAL] CORS_ORIGIN environment variable is required in production.');
@@ -105,48 +106,81 @@ app.use(cors({
   credentials: true
 }));
 
-// Basic spam protection: rate limiting in memory
-// Note: This is a simple in-memory rate limiter. It does not persist across server restarts
-// and will not work across multiple distributed server instances.
-const ipRateLimit = new Map();
-const RATE_LIMIT_MS = 60000; // 1 minute per IP
-const RATE_LIMIT_MAX = 3;
+// ─────────────────────────────────────────────────────────────────────────────
+// Persistent Rate Limiter — Supabase backed (works across serverless instances)
+// Industry-standard approach used by companies like Vercel, Linear, Resend.
+// Falls back gracefully if DB is unreachable — never blocks legitimate users.
+// Requires: rate_limits table (see rate-limits-migration.sql)
+// ─────────────────────────────────────────────────────────────────────────────
+const _rl = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
-function isRateLimited(ip) {
-  const now = Date.now();
-  if (!ipRateLimit.has(ip)) {
-    ipRateLimit.set(ip, { count: 1, lastTime: now });
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX       = 3;         // max submissions per window
+
+async function isRateLimited(ip, endpoint = 'contact') {
+  try {
+    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+
+    const { data: existing } = await _rl
+      .from('rate_limits')
+      .select('count, window_start')
+      .eq('ip', ip)
+      .eq('endpoint', endpoint)
+      .maybeSingle();
+
+    // No record or window expired — fresh start
+    if (!existing || existing.window_start < windowStart) {
+      await _rl.from('rate_limits').upsert(
+        { ip, endpoint, count: 1, window_start: new Date().toISOString() },
+        { onConflict: 'ip,endpoint' }
+      );
+      return false;
+    }
+
+    // Within window — check count
+    if (existing.count >= RATE_LIMIT_MAX) return true;
+
+    // Increment count
+    await _rl
+      .from('rate_limits')
+      .update({ count: existing.count + 1 })
+      .eq('ip', ip)
+      .eq('endpoint', endpoint);
+
+    return false;
+  } catch (err) {
+    // Never block legitimate users due to a DB error
+    console.error('[RateLimit] DB check failed, allowing request:', err.message);
     return false;
   }
-  const entry = ipRateLimit.get(ip);
-  if (now - entry.lastTime > RATE_LIMIT_MS) {
-    entry.count = 1;
-    entry.lastTime = now;
-    return false;
-  }
-  entry.count += 1;
-  return entry.count > RATE_LIMIT_MAX;
 }
 
-const rateLimitMiddleware = (req, res, next) => {
-  if (req.method === 'POST') {
-    const ip = req.ip || req.connection.remoteAddress;
-    if (isRateLimited(ip)) {
-      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+// Factory: returns a middleware scoped to an explicitly-named endpoint bucket.
+// Fixes the bug where req.path inside a mounted sub-router resolves to '/'
+// (i.e. the relative path), causing all endpoints to share the same 'global' bucket.
+function makeRateLimitMiddleware(endpointName) {
+  return async function rateLimitMiddleware(req, res, next) {
+    if (req.method === 'POST') {
+      const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+      const limited = await isRateLimited(ip, endpointName);
+      if (limited) {
+        return res.status(429).json({ error: 'Too many requests. Please try again in a minute.' });
+      }
     }
-  }
-  next();
-};
+    next();
+  };
+}
 
 app.use(express.json());
 import eventsRoutes from './eventsRoutes.js';
 app.use('/api/events', eventsRoutes);
 
 import donationRoutes from './donationRoutes.js';
-app.use('/api/donations', rateLimitMiddleware, donationRoutes);
+app.use('/api/donations', makeRateLimitMiddleware('donations'), donationRoutes);
 
-// Serve uploads
-app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 import contactRoutes from './contactRoutes.js';
 import visitorRoutes from './visitorRoutes.js';
@@ -157,7 +191,7 @@ import adminUserRoutes from './adminUserRoutes.js';
 import siteSettingsRoutes from './siteSettingsRoutes.js';
 
 // Apply rate limiting middleware to the specific post endpoint inside contactRoutes
-app.use('/api/contact', rateLimitMiddleware, contactRoutes);
+app.use('/api/contact', makeRateLimitMiddleware('contact'), contactRoutes);
 
 app.use('/api/visitor', visitorRoutes);
 app.use('/api/upload', uploadRoutes);
@@ -182,7 +216,7 @@ import leadershipRoutes from './leadershipRoutes.js';
 app.use('/api/leadership', leadershipRoutes);
 
 // Serve static files in production
-if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_render') {
+if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'dist')));
   
   // Any request that doesn't match an API route or static file gets sent to index.html (client-side routing)
