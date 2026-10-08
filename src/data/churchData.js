@@ -119,25 +119,47 @@ export const churchData = {
 
   pastoralTeam: [
     {
-      name: "Rev. Dr. M. Purushotham",
+      id: "rev-dr-m-purshotham",
+      name: "Rev. Dr. M. Purshotham",
       role: "Senior Pastor",
-      image_url: "/images/pastor-purushotham.jpg",
-      bio: "Rev. Dr. M. Purshotham has been faithfully serving the Lord at Centenary Baptist Church, Secunderabad for the past 23 years, actively ministering through Telugu, Hindi and outreach ministries. Having come to know Jesus Christ through God’s grace and His Word, he has devoted his life to serving Christ and His people, witnessing His faithfulness throughout his journey.<br><br>He is blessed with a loving family, his wife, Mrs. Helen, who serves in the medical ministry, and their three children, Victor Paul, Dr. Methuselah and Hadassah Sharon. His elder son Victor Paul is married to Richitha Shuneeya, and they are blessed with a son, Ronen Penuel Paul."
+      image: "/images/dr-m-purshotham.png",
+      shortIntro: "Serving faithfully at Centenary Baptist Church, Secunderabad through Telugu, Hindi and outreach ministries.",
+      bio: "Rev. Dr. M. Purshotham has been faithfully serving the Lord at Centenary Baptist Church, Secunderabad for the past 23 years, actively ministering through Telugu, Hindi and outreach ministries. Having come to know Jesus Christ through God’s grace and His Word, he has devoted his life to serving Christ and His people, witnessing His faithfulness throughout his journey.\n\nHe is blessed with a loving family, his wife, Mrs. Helen, who serves in the medical ministry, and their three children, Victor Paul, Dr. Methuselah and Hadassah Sharon. His elder son Victor Paul is married to Richitha Shuneeya, and they are blessed with a son, Ronen Penuel Paul."
     },
     {
-      name: "Rev. Dr. V. Satyaranjan",
-      role: "Associate Pastor",
-      image: null
-    },
-    {
+      id: "rev-b-charles-theodore",
       name: "Rev. B. Charles Theodore",
-      role: "Associate Pastor",
-      image: null
+      role: "Pastor",
+      image: "/images/rev-b-charles-theodore.png",
+      shortIntro: "Serving faithfully at Centenary Baptist Church, Secunderabad through Telugu and English worship ministries.",
+      bio: "<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">MINISTRY</strong><br>Pastor of Centenary Baptist Church, Secunderabad, serving fervently for past 12 years in Telugu and English worship services.\n\nAfter his theological studies he taught in Emmanuel Bible College, at Bogaram, Near Keesara for one year; then he taught in Trinity Bible College for two years. Then he planted a church in Appanapet village and served there for almost five years.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">EDUCATION</strong><br>He did his M. A. Theological Studies at Southern Asia Institute of Advanced Christian Studies (SAIACS), Bangalore.\n\nHe also did his bachelor’s degree in B. Com from A. V. College, Hyderabad which is accredited to Osmania University.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">BACKGROUND</strong><br>He is a native of Peddapalli, Telagana. He is born to Bonkuri Devasahayam and Lilly Florence. He is the third child among 4 brothers and 1 sister.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">FAMILY</strong><br>Married to Sathvika and blessed with two sons and one daughter.\n\n• Elijah Sahayam - 15 years - Studying 10th Class<br>• Joshua Anugraham - 13 years - Studying 9th Class"
     },
     {
-      name: "Rev. G. James Zechariah",
+      id: "rev-dr-v-satya-ranjan",
+      name: "Rev. Dr. V. Satya Ranjan",
+      role: "Pastor",
+      image: "/images/rev-dr-v-satya-ranjan.png",
+      imagePosition: "center 35%",
+      shortIntro: "Pastor of Centenary Baptist Church, Secunderabad.",
+      bio: "<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">PERSONAL PROFILE</strong><br>Full Name: Valabhapuram Satya Ranjan.<br>Parentage: Son of the late Rev. Dr. V. Paramjyothi and Mrs. Ratnakumari, both of whom served in the pastoral ministry at Lone Star Telugu Baptist Church, Nellore. Former Bursar and faculty member at Ramayapatnam Baptist Theological Seminary.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">ACADEMIC BACKGROUND</strong><br>1. B,sc - SV University, Tirupati, AP.<br>2. M. Div - Hindustan Bible Institute & College, Chennai, TN<br>3. D. Min - ACTC Senet of Sirampur College, Hyderabad, Telangana.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">FAMILY DETAILS</strong><br>Spouse: Karunya.<br>Children: Two sons, Jovan Ranjan (13 years) and Nihaan Ranjan (9 years).\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">MINISTERIAL EXPERIENCE</strong><br>1. Faculty, HBI Regional Center, Eluru, AP (3 years).<br>2. Pastor, Centenary Telugu Baptist Church, Atmakur, Nellore, AP (5 years).<br>3. Pastor, Evangelical Baptist Church, Rangampet, Warangal (6 years).\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">CURRENT POSITION</strong><br>Pastor, Centenary Baptist Church, Secunderabad."
+    },
+    {
+      id: "rev-gutam-zechariah-james",
+      name: "Rev. Gutam Zechariah James",
       role: "Associate Pastor",
-      image: null
+      image: "/images/rev-gutam-zechariah-james.png",
+      shortIntro: "Dedicated to proclaiming the Word of God, serving the Church, and teaching Biblical truths.",
+      bio: "<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">MINISTRY</strong><br>Gutam Zechariah James is a dedicated Pastor, Preacher, and Teacher, serving the Centenary Baptist Church. He has faithfully devoted four decades of ministry to proclaiming the Word of God, serving the Church, and teaching Biblical truths in India and the United States of America.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">MINISTRY COMMITMENT</strong><br>His ministry is marked by a deep commitment to Scripture, Christian service, preaching, teaching, and nurturing believers in their faith.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">FAMILY</strong><br>Spouse:<br>Mrs. Vasundhara\n\nChildren:<br>Jessica — MS<br>Veronica — BE\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">FAMILY & SERVICE</strong><br>Together we as a family committed to Faith, Education, and Christian Service to glorify God through our lives and ministry."
+    },
+    {
+      id: "rev-vanguri-elia",
+      name: "Rev. Dr. Vanguri Elia",
+      role: "Associate Pastor",
+      secondaryRole: "Outreach Pastor",
+      image: "/images/rev-vanguri-elia.png",
+      imagePosition: "center 20%",
+      shortIntro: "Serving as a pastor at BC Bholakpur for 25 years.",
+      bio: "<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">ABOUT</strong><br>Rev. Dr. Vanguri Elia has served as a pastor at BC Bholakpur for 25 years.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">EDUCATION</strong><br>C.Th. — Ramayapatnam Baptist Theological Seminary (1993)<br>B.Th. — ACTC (1994–1998)<br>B.D. — ACTC (2005–2006)<br>D.Min. — ACTC\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">MINISTRY</strong><br>25 years serving as Pastor at BC Bholakpur.\n\n<strong style=\"color: #B6893F; letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.9em;\">FAMILY</strong><br>Blessed with two children:<br><br>Daughter:<br>Nissy Nivedita<br>Studying B.Tech.<br><br>Son:<br>Noel Harsha<br>Intermediate First Year"
     }
   ],
 

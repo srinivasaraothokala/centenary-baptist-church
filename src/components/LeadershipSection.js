@@ -1,131 +1,74 @@
 import './LeadershipSection.css';
-import { t } from '../i18n.js';
 import { churchData } from '../data/churchData.js';
 
+/**
+ * LeadershipSection — Premium Heritage Pastor Team homepage preview.
+ * Shows a compact 4-card grid on desktop.
+ */
 export class LeadershipSection {
   constructor(containerSelector, options = {}) {
     this.containerSelector = containerSelector;
     this.container = document.querySelector(containerSelector);
-    this.options = Object.assign({
-      isSubSection: false,
-      showTitle: true,
-      showExploreLink: true
-    }, options);
+    this.options = Object.assign({ isSubSection: false }, options);
 
     if (this.container) {
       this.render();
-      // Re-render on language change
       window.addEventListener('langChange', () => this.render());
     }
-  }
-
-  _getRoleKey(role) {
-    // Map English role strings to i18n keys
-    const roleMap = {
-      'Senior Pastor': 'roleSeniorPastor',
-      'Associate Pastor': 'roleAssociatePastor',
-      'Church Pastor': 'roleChurchPastor',
-      'President': 'rolePresident',
-      'Secretary': 'roleSecretary',
-      'Treasurer': 'roleTreasurer',
-      'Deacons': 'roleDeacons',
-      'Vice-President / Asst. Secretary / Asst. Treasurer': 'roleVicePresident'
-    };
-    return roleMap[role] || null;
-  }
-
-  _getNameKey(name) {
-    // Map known English values to i18n keys
-    const nameMap = {
-      '12 members, incl. 2 women': 'deaconsValue',
-      'To be confirmed by church office': 'tbc'
-    };
-    return nameMap[name] || null;
   }
 
   render() {
     this.container = document.querySelector(this.containerSelector);
     if (!this.container) return;
 
-    const { pastoralTeam, executiveCommittee } = churchData;
+    const pastors = churchData.pastoralTeam;
+    if (!pastors || pastors.length === 0) return;
 
-    let pastoralHTML = '';
-    pastoralTeam.forEach(p => {
-      const roleKey = this._getRoleKey(p.role);
-      const translatedRole = roleKey ? t(roleKey) : p.role;
-      pastoralHTML += `
-        <div class="pastor-card">
-          ${p.image ? `<div class="pastor-card-img-wrap"><div class="pastor-card-img" style="background-image: url('${p.image}')"></div></div>` : ''}
-          <div class="pastor-card-content">
-            <div class="pastor-card-role">${translatedRole}</div>
-            <h4 class="pastor-card-name">${p.name}</h4>
+    const cardsHTML = pastors.map(pastor => {
+      const imagePositionStyle = pastor.imagePosition ? `style="object-position: ${pastor.imagePosition};"` : '';
+      const altRole = pastor.secondaryRole ? `${pastor.role} and ${pastor.secondaryRole}` : pastor.role;
+      const imageHTML = pastor.image
+        ? `<img src="${pastor.image}" alt="${pastor.name}, ${altRole} of Centenary Baptist Church, Secunderabad" class="pt-card-photo" loading="lazy" ${imagePositionStyle}>`
+        : `<div class="pt-card-photo-placeholder" aria-label="Profile image unavailable for ${pastor.name}"><span class="pt-cross-placeholder">†</span></div>`;
+
+      const secondaryRoleHTML = pastor.secondaryRole 
+        ? `<div class="pt-card-secondary-role">${pastor.secondaryRole}</div>` 
+        : '';
+
+      return `
+      <div class="pt-card">
+        <div class="pt-card-photo-wrap">
+          ${imageHTML}
+        </div>
+        <div class="pt-card-body">
+          <div class="pt-card-divider" aria-hidden="true">
+            <span class="pt-cross">†</span>
           </div>
+          <div class="pt-card-role">${pastor.role}</div>
+          ${secondaryRoleHTML}
+          <h3 class="pt-card-name">${pastor.name}</h3>
+          <p class="pt-card-intro">${pastor.shortIntro || ''}</p>
+          ${pastor.id ? `<a href="#/pastor-team/${pastor.id}" class="pt-card-btn" aria-label="Know more about ${pastor.name}">Know More &rarr;</a>` : ''}
         </div>
-      `;
-    });
+      </div>
+    `}).join('');
 
-    const midIndex = Math.ceil(executiveCommittee.length / 2);
-    const col1 = executiveCommittee.slice(0, midIndex);
-    const col2 = executiveCommittee.slice(midIndex);
-
-    const renderCol = (items) => {
-      let html = '';
-      items.forEach(item => {
-        const roleKey = this._getRoleKey(item.role);
-        const translatedRole = roleKey ? t(roleKey) : item.role;
-        const nameKey = this._getNameKey(item.name);
-        const translatedName = nameKey ? t(nameKey) : item.name;
-        html += `
-          <div class="exec-list-item">
-            <div class="exec-role">${translatedRole}</div>
-            <div class="exec-name">${translatedName}</div>
-          </div>
-        `;
-      });
-      return html;
-    };
-
-    const wrapperClass = this.options.isSubSection ? 'leadership-section subsection' : 'leadership-section full-section';
-
-    let headerHTML = '';
-    if (this.options.showTitle) {
-      headerHTML = `
-        <div class="leadership-header text-center fade-in-up">
-          <h2 class="leadership-main-title">${t('leadershipTitle')}</h2>
-        </div>
-      `;
-    }
-
-    let footerHTML = '';
-    if (this.options.showExploreLink) {
-      footerHTML = `
-        <div class="leadership-footer text-center fade-in-up" style="animation-delay: 0.3s">
-          <a href="#/leadership" class="btn-explore-leadership">${t('meetLeadership')}</a>
-        </div>
-      `;
-    }
+    const wrapperClass = this.options.isSubSection
+      ? 'pt-section pt-section--sub'
+      : 'pt-section';
 
     this.container.innerHTML = `
-      <section class="${wrapperClass}">
-        <div class="wrap">
-          ${headerHTML}
-          
-          <div class="pastoral-team-section fade-in-up" style="animation-delay: 0.1s">
-            <h3 class="leadership-subheading text-center">${t('pastoralTeamTitle')}</h3>
-            <div class="pastoral-grid">
-              ${pastoralHTML}
-            </div>
+      <section class="${wrapperClass}" aria-label="Pastor Team">
+        <div class="pt-overlay"></div>
+        <div class="wrap pt-content-wrap">
+          <div class="pt-header fade-in-up">
+            <div class="pt-eyebrow">PASTOR TEAM</div>
+            <h2 class="pt-heading">Serving Christ. Shepherding His People.</h2>
+            <p class="pt-subheading">Meet our pastoral team who faithfully serve, teach and lead our church family.</p>
           </div>
-          
-          <div class="executive-committee-section fade-in-up" style="animation-delay: 0.2s">
-            <h3 class="leadership-subheading text-center">${t('executiveCommitteeTitle')}</h3>
-            <div class="exec-grid">
-              <div class="exec-col">${renderCol(col1)}</div>
-              <div class="exec-col">${renderCol(col2)}</div>
-            </div>
+          <div class="pt-grid fade-in-up" style="animation-delay:0.15s;">
+            ${cardsHTML}
           </div>
-
-          ${footerHTML}
         </div>
       </section>
     `;
@@ -134,15 +77,10 @@ export class LeadershipSection {
   }
 
   _setupAnimations() {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.1 });
 
-    const animatedElements = this.container.querySelectorAll('.fade-in-up');
-    animatedElements.forEach(el => observer.observe(el));
+    this.container.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
   }
 }

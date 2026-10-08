@@ -78,6 +78,7 @@ function getNavData() {
         }
       ]
     },
+    { label: 'Pastor Team', href: '#/pastor-team' },
     {
       label: t('navMinistries'), href: '#/ministries', dropdown: true,
       columns: [
@@ -295,3 +296,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+

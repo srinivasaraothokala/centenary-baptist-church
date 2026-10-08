@@ -19,6 +19,7 @@ import { AdminAuditLogs } from './admin/AdminAuditLogs.js';
 import { AdminLeadership } from './admin/AdminLeadership.js';
 import { AdminVisitors } from './admin/AdminVisitors.js';
 import { GalleryPage } from './pages/GalleryPage.js';
+import { PastorTeamPage } from './pages/PastorTeamPage.js';
 import { supabaseClient } from './supabaseFrontendClient.js';
 
 export class Router {
@@ -45,6 +46,7 @@ export class Router {
     this.adminLeadership = new AdminLeadership('page-content');
     this.adminVisitors = new AdminVisitors('page-content');
     this.galleryPage = new GalleryPage('page-content');
+    this.pastorTeamPage = new PastorTeamPage('page-content');
 
     
     // Bind routing events
@@ -265,6 +267,12 @@ export class Router {
     // Gallery — own full-page layout (hero + grid + lightbox)
     if (path === '/gallery') {
       this.galleryPage.render();
+      return;
+    }
+
+    // Pastor Team
+    if (path === '/pastor-team' || path.startsWith('/pastor-team/')) {
+      this.pastorTeamPage.render(path);
       return;
     }
 
