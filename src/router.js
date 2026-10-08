@@ -20,17 +20,6 @@ import { AdminLeadership } from './admin/AdminLeadership.js';
 import { AdminVisitors } from './admin/AdminVisitors.js';
 import { GalleryPage } from './pages/GalleryPage.js';
 import { supabaseClient } from './supabaseFrontendClient.js';
-// ── Member Portal ──────────────────────────────────────────────
-import { MemberLogin } from './member/MemberLogin.js';
-import { MemberRegister } from './member/MemberRegister.js';
-import { MemberVerify } from './member/MemberVerify.js';
-import { MemberForgotPassword } from './member/MemberForgotPassword.js';
-import { MemberDashboard } from './member/MemberDashboard.js';
-import { MemberProfile } from './member/MemberProfile.js';
-import { MemberFamily } from './member/MemberFamily.js';
-import { MemberSettings } from './member/MemberSettings.js';
-import { MemberResetPassword } from './member/MemberResetPassword.js';
-import { memberAuth } from './member/memberAuth.js';
 
 export class Router {
   constructor() {
@@ -56,16 +45,7 @@ export class Router {
     this.adminLeadership = new AdminLeadership('page-content');
     this.adminVisitors = new AdminVisitors('page-content');
     this.galleryPage = new GalleryPage('page-content');
-    // Member portal pages
-    this.memberLogin          = new MemberLogin('page-content');
-    this.memberRegister       = new MemberRegister('page-content');
-    this.memberVerify         = new MemberVerify('page-content');
-    this.memberForgotPassword = new MemberForgotPassword('page-content');
-    this.memberDashboard      = new MemberDashboard('page-content');
-    this.memberProfile        = new MemberProfile('page-content');
-    this.memberFamily         = new MemberFamily('page-content');
-    this.memberSettings       = new MemberSettings('page-content');
-    this.memberResetPassword  = new MemberResetPassword('page-content');
+
     
     // Bind routing events
     window.addEventListener('hashchange', () => this.handleRoute());
@@ -77,17 +57,6 @@ export class Router {
     supabaseClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' && window.location.hash.startsWith('#/admin')) {
         window.location.hash = '#/admin/login';
-      }
-      // If member signs out while on a protected member page, redirect to member login
-      if (event === 'SIGNED_OUT' && window.location.hash.startsWith('#/member/') &&
-          !['#/member/login','#/member/register','#/member/verify','#/member/forgot-password','#/member/reset-password'].includes(window.location.hash)) {
-        window.location.hash = '#/member/login';
-      }
-      // PASSWORD_RECOVERY: user clicked the reset link in their email.
-      // Supabase fires this before the URL fragment is processed by the router.
-      // Navigate to the reset-password page so the user can set a new password.
-      if (event === 'PASSWORD_RECOVERY') {
-        window.location.hash = '#/member/reset-password';
       }
     });
   }
@@ -113,8 +82,6 @@ export class Router {
       this.showHomepage();
     } else if (hash.startsWith('#/admin')) {
       await this.showAdmin(hash);
-    } else if (hash.startsWith('#/member')) {
-      await this.showMember(hash);
     } else {
       this.showInternalPage(hash.replace('#', ''));
     }
@@ -147,7 +114,7 @@ export class Router {
 
     const role = session.user?.user_metadata?.role;
     if (role !== 'admin' && role !== 'super_admin') {
-      window.location.hash = '#/member/dashboard';
+      window.location.hash = '#/';
       return;
     }
 
@@ -276,78 +243,7 @@ export class Router {
     }
   }
 
-  // ── Member Portal routing ──────────────────────────────────
-  async showMember(hash) {
-    // Hide public website chrome; member portal has its own layout
-    this.homepageView.style.display = 'none';
-    this.pageContentContainer.style.display = 'block';
-    if (this.mainHeader) this.mainHeader.style.display = 'none';
-    if (this.mainFooter) this.mainFooter.style.display = 'none';
-    if (this.topBar)     this.topBar.style.display     = 'none';
 
-    // Logout action
-    if (hash === '#/member/logout') {
-      await memberAuth.logout();
-      window.location.hash = '#/member/login';
-      return;
-    }
-
-    // Unauthenticated-only routes: if user is already logged in, redirect to dashboard
-    const publicMemberRoutes = [
-      '#/member/login',
-      '#/member/register',
-      '#/member/forgot-password'
-    ];
-    if (publicMemberRoutes.includes(hash)) {
-      const session = await memberAuth.getSession();
-      if (session && session.user?.email_confirmed_at) {
-        window.location.hash = '#/member/dashboard';
-        return;
-      }
-      if (hash === '#/member/login')           { this.memberLogin.render();          return; }
-      if (hash === '#/member/register')         { this.memberRegister.render();       return; }
-      if (hash === '#/member/forgot-password')  { this.memberForgotPassword.render(); return; }
-    }
-
-    // Reset-password page: requires a recovery session (Supabase injects it via URL token)
-    if (hash === '#/member/reset-password') {
-      await this.memberResetPassword.render();
-      return;
-    }
-
-    // Verification page (semi-public: accessible while email unverified)
-    if (hash === '#/member/verify') {
-      await this.memberVerify.render();
-      return;
-    }
-
-    // --- Protected member routes below ---
-    // Check auth: must be logged in AND email confirmed
-    const session = await memberAuth.getSession();
-    if (!session) {
-      window.location.hash = '#/member/login';
-      return;
-    }
-    if (!session.user?.email_confirmed_at) {
-      sessionStorage.setItem('mp_pending_email', session.user.email);
-      window.location.hash = '#/member/verify';
-      return;
-    }
-
-    // Route to protected pages
-    if (hash === '#/member/dashboard' || hash === '#/member') {
-      await this.memberDashboard.render();
-    } else if (hash === '#/member/profile') {
-      await this.memberProfile.render();
-    } else if (hash === '#/member/family') {
-      await this.memberFamily.render();
-    } else if (hash === '#/member/settings') {
-      await this.memberSettings.render();
-    } else {
-      // Unknown member route → dashboard
-      window.location.hash = '#/member/dashboard';
-    }
-  }
 
   showHomepage() {
     this.pageContentContainer.style.display = 'none';

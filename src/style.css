@@ -115,7 +115,8 @@ header.scrolled {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start; /* Logo and Nav grouped together */
+  gap: 60px; /* Controlled gap */
   padding: 0 28px;
   height: 90px;
   max-width: 1400px;
@@ -130,24 +131,31 @@ header.scrolled .navbar {
   align-items: center;
   gap: 16px;
 }
-.brand-logo {
-  height: 70px;
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.brand-seal {
+  height: 64px;
   width: auto;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+header.scrolled .brand-seal {
+  height: 48px;
+}
+.brand-logo-full {
+  width: 360px;
+  height: auto;
+  margin-top: -16px;
+  margin-bottom: -16px;
   object-fit: contain;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.brand-text .name {
-  font-family: 'Playfair Display', serif;
-  font-size: 23px;
-  font-weight: 700;
-  color: var(--primary-green);
-  line-height: 1.2;
-  white-space: nowrap;
-}
-.brand-text .tagline {
-  font-size: 13px;
-  color: var(--muted-text);
-  margin-top: 2px;
-  white-space: nowrap;
+header.scrolled .brand-logo-full {
+  width: 280px;
+  margin-top: -10px;
+  margin-bottom: -10px;
 }
 .nav-bottom {
   display: flex;
@@ -316,7 +324,8 @@ header.scrolled .navbar {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start; /* Logo and Nav grouped together */
+  gap: 60px; /* Controlled gap */
   padding: 0 24px;
   height: 88px;
   max-width: 1400px;
@@ -509,11 +518,12 @@ header.scrolled .navbar {
   color: var(--secondary-gold);
 }
 .hero .lede {
-  font-size: 18px;
-  color: var(--warm-white);
+  font-size: 20px;
+  color: var(--secondary-gold);
   margin-bottom: 28px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: 'Inter', sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 .hero-actions {
   display: flex;
@@ -2487,3 +2497,314 @@ header.scrolled .navbar {
   background-size: 1200px 100%;
   animation: skel-shimmer 1.4s infinite linear;
 }
+/* ==========================================================================
+ * Mobile Responsive Fixes (Added for production bug)
+ * ========================================================================== */
+@media (max-width: 1023px) {
+  /* Tablet tweaks */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 16px;
+  }
+  .stat-item:nth-child(2) {
+    border-right: none;
+  }
+}
+
+@media (max-width: 767px) {
+  /* 1. Header/Logo area horizontal overflow */
+  .navbar {
+    padding: 0 16px;
+    height: 70px;
+    justify-content: space-between; /* Restore mobile layout */
+    gap: 0;
+  }
+  .brand {
+    gap: 12px;
+  }
+  .brand-seal {
+    height: 42px;
+  }
+  .brand-logo-full {
+    width: 240px;
+    height: auto;
+    max-width: 60vw; /* Prevent overflowing hamburger menu */
+    margin-top: -10px;
+    margin-bottom: -10px;
+  }
+  .top-bar .nav-top {
+    padding: 0 16px;
+    height: auto;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  /* 2, 4. Hero section responsiveness */
+  .hero {
+    height: auto;
+    min-height: auto;
+    padding: 40px 0;
+  }
+  .hero-content {
+    flex-direction: column;
+    padding: 0 16px;
+  }
+  .hero-text-content {
+    max-width: 100%;
+  }
+  .hero .hero-title {
+    font-size: clamp(32px, 8vw, 44px);
+    line-height: 1.1;
+  }
+  .hero .lede {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .hero-actions .btn {
+    width: 100%;
+    height: 48px;
+  }
+  .hero-decorative-text {
+    display: none; /* Hide on mobile to save space and reduce clutter */
+  }
+
+  /* 3. Worship/service card */
+  .hero-schedule-card {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    gap: 16px;
+    align-items: stretch;
+    margin-top: 24px;
+  }
+  .schedule-header {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 12px;
+    width: 100%;
+    align-items: flex-start;
+  }
+  .schedule-header .title {
+    font-size: 15px;
+  }
+  .schedule-times {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+  .time-slot {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 12px;
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .time-slot:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* 6. Statistics section */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 16px;
+    padding: 0 16px;
+  }
+  .stat-item {
+    border-right: none;
+    padding: 0;
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .stat-text strong {
+    font-size: 28px;
+  }
+  .stat-text span {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 374px) {
+  /* For very narrow screens like iPhone SE (320px) */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-item {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* ==========================================================================
+   Main Footer (Maroon)
+   ========================================================================== */
+.footer-maroon {
+  background: linear-gradient(180deg, #3d0b0b 0%, #2a0707 100%);
+  color: #fff;
+  padding: 64px 0 24px;
+  font-family: var(--font-sans, 'Inter', sans-serif);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.footer-brand .brand-name {
+  font-family: var(--font-serif, 'Playfair Display', serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.footer-brand .brand-desc {
+  opacity: 0.85;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  max-width: 90%;
+}
+
+.footer-brand .social-links {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-links h4,
+.footer-contact h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.footer-links nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links nav a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  width: fit-content;
+}
+
+.footer-links nav a:hover {
+  color: #fff;
+  transform: translateX(4px);
+}
+
+.footer-contact p {
+  opacity: 0.85;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.footer-contact a {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255,255,255,0.4);
+  text-underline-offset: 4px;
+}
+
+.footer-contact a:hover {
+  text-decoration-color: #fff;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: #fff;
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.social-btn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+}
+
+.social-btn svg {
+  display: block;
+}
+
+.footer-maroon-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  opacity: 0.75;
+  font-size: 0.85rem;
+}
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-bottom-links a {
+  color: #fff;
+  text-decoration: none;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+.footer-bottom-links a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.footer-bottom-links .sep {
+  opacity: 0.5;
+}
+
+@media (max-width: 992px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+

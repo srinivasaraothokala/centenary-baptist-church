@@ -113,19 +113,7 @@ function getNavData() {
         }
       ]
     },
-    { label: t('navGive'), href: '#/give' },
-    {
-      label: '👤 Member', href: '#/member/login', dropdown: true, isHighlighted: true,
-      columns: [
-        {
-          title: 'Member Portal',
-          items: [
-            { label: '🔑 Member Login', href: '#/member/login' },
-            { label: '✨ Create Account', href: '#/member/register', isAction: true }
-          ]
-        }
-      ]
-    }
+    { label: t('navGive'), href: '#/give' }
   ];
 }
 

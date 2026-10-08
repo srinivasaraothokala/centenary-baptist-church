@@ -35,3 +35,10 @@ fix_*.js
 verify_*.cjs
 verify_*.js
 seed_*.cjs
+
+# Audit reports and legacy files — never deploy these
+*.docx
+phase6-*.html
+phase6-*.pdf
+old_*.html
+old_*.css
