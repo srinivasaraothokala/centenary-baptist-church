@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://cbcsecbad.in/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- About -->
+  <url>
+    <loc>https://cbcsecbad.in/#/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/about/our-story</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/about/our-beliefs</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/about/mission-vision</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/about/leadership</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/about/our-campus</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/about/faith-history</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- Worship -->
+  <url>
+    <loc>https://cbcsecbad.in/#/worship</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/worship/sunday-worship-info</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/worship/sermons</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/worship/watch-live</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/worship/prayer</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- Ministries -->
+  <url>
+    <loc>https://cbcsecbad.in/#/ministries</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- Events -->
+  <url>
+    <loc>https://cbcsecbad.in/#/events</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- Pastor Team -->
+  <url>
+    <loc>https://cbcsecbad.in/#/pastor-team</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- Gallery -->
+  <url>
+    <loc>https://cbcsecbad.in/#/gallery</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- Give / Donate -->
+  <url>
+    <loc>https://cbcsecbad.in/#/give</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+  <!-- Visit / Contact -->
+  <url>
+    <loc>https://cbcsecbad.in/#/visit</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/visit/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+  <url>
+    <loc>https://cbcsecbad.in/#/visit/plan</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-10-09</lastmod>
+  </url>
+
+</urlset>
