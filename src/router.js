@@ -287,7 +287,7 @@ export class Router {
           contactWrapper.innerHTML = '';
           new ContactForm('.contact-form-wrapper-page');
         }
-      }, 50);
+      }, 150);
     }
     
     // Special case: initialize the FaithfulnessTimeline if it exists on the rendered page

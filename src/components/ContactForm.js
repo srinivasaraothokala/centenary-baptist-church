@@ -1,3 +1,4 @@
+import { API_BASE } from '../apiConfig.js';
 import './ContactForm.css';
 
 export class ContactForm {
@@ -145,7 +146,7 @@ export class ContactForm {
       isValid = false;
     }
 
-    if (!email.value.trim() || !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email.value)) {
+    if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
       email.closest('.cf-group').classList.add('has-error');
       isValid = false;
     }

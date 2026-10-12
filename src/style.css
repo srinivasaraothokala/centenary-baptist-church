@@ -75,28 +75,7 @@ img { max-width: 100%; display: block; }
 .text-center { text-align: center; }
 
 /* Header */
-.mega-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100vw;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  border-top: 1px solid var(--border);
-  padding: 40px 0;
-  display: none;
-  z-index: 99;
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.mega-menu.active {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-}
+/* mega-menu styles defined in the Navigation Bar section below */
 header {
   position: sticky;
   top: 0;
@@ -320,17 +299,6 @@ header.scrolled .brand-logo-full {
   color: rgba(248, 245, 234, 0.4);
 }
 
-.navbar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start; /* Logo and Nav grouped together */
-  gap: 60px; /* Controlled gap */
-  padding: 0 24px;
-  height: 88px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
 .brand {
   display: flex;
   align-items: center;
@@ -361,6 +329,7 @@ header.scrolled .brand-logo-full {
 }
 .nav-bottom .links {
   display: flex;
+  align-items: center;
   gap: 24px;
 }
 /* Replaced with new mega menu styles */
@@ -1348,7 +1317,7 @@ header.scrolled .brand-logo-full {
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .nav-bottom .links, .btn-nav-watch { display: none; }
   .nav-bottom .links.active {
     display: flex;
@@ -1583,6 +1552,33 @@ header.scrolled .brand-logo-full {
 .mega-col a.is-action {
   color: var(--secondary-gold);
   font-weight: 600;
+}
+
+/* Mobile touch: show dropdown when .open class is toggled by JS */
+.nav-item.has-dropdown.open .mega-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+/* On mobile, mega-menu should be full-width and not centered */
+@media (max-width: 1024px) {
+  .mega-menu {
+    position: static;
+    transform: none;
+    min-width: 100%;
+    border-radius: 8px;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  .nav-item.has-dropdown.open .mega-menu {
+    transform: none;
+  }
+  .mega-menu-inner {
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 
 /* ========================================================================= */
