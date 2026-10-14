@@ -211,6 +211,35 @@ function initModals() {
   });
 }
 
+async function initWatchLiveButton() {
+  const btn = $('#btn-watch-live');
+  if (!btn) return;
+
+  let watchUrl = '#/worship/watch-live'; // fallback to internal page
+  try {
+    const res = await fetch(`${API_BASE}/settings`);
+    if (res.ok) {
+      const data = await res.json();
+      const wl = data.settings?.watchLive;
+      if (wl?.enabled !== false && wl?.url) {
+        watchUrl = wl.url;
+      }
+    }
+  } catch (err) {
+    console.warn('[Watch Live] Could not fetch settings, using fallback.');
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    // External URL → open in new tab; internal hash → navigate in same tab
+    if (watchUrl.startsWith('http')) {
+      window.open(watchUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      window.location.hash = watchUrl.replace(/^#/, '');
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize i18n FIRST (reads localStorage, wires buttons)
   initI18n();
@@ -219,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNavigation();
 
   initModals();
+  initWatchLiveButton();
   initScrollEffects();
 
   // Initialize SPA Router

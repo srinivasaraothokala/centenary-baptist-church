@@ -17,7 +17,7 @@ export class FinalCTASection {
         <p style="color: var(--muted-text); font-size: 16px; margin: 0 0 24px 0;">Join us at St. Mary's Road, Secunderabad.</p>
         <div class="fcta-actions">
           <a href="#/visit" class="btn btn-solid-maroon" style="margin-right: 16px;">PLAN YOUR VISIT &rarr;</a>
-          <a href="#/watch-live" class="btn btn-outline-maroon">WATCH LIVE &rarr;</a>
+          <a href="#/worship/watch-live" class="btn btn-outline-maroon">WATCH LIVE &rarr;</a>
         </div>
       </div>
     `;

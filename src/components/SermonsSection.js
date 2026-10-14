@@ -147,6 +147,8 @@ export class SermonsSection {
     `;
 
     churchData.sermons.forEach((sermon, i) => {
+      const watchUrl  = sermon.videoUrl  || sermon.youtube_url || sermon.url || '';
+      const listenUrl = sermon.audioUrl  || sermon.audio_url  || watchUrl;
       html += `
         <div class="sermon-row fade-in-up stagger-1">
           <div class="sermon-info">
@@ -158,14 +160,16 @@ export class SermonsSection {
             </p>
           </div>
           <div class="sermon-actions">
-            <button class="btn btn-outline-round btn-sermon-watch">
+            ${watchUrl ? `
+            <button class="btn btn-outline-round btn-sermon-watch" data-url="${watchUrl}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
               WATCH
-            </button>
-            <button class="btn btn-outline-round btn-sermon-listen">
+            </button>` : ''}
+            ${listenUrl ? `
+            <button class="btn btn-outline-round btn-sermon-listen" data-url="${listenUrl}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
               LISTEN
-            </button>
+            </button>` : ''}
           </div>
         </div>
       `;
@@ -175,8 +179,8 @@ export class SermonsSection {
         </div>
         
         <div class="sermons-footer text-center" style="margin-top: 48px;">
-          <a href="#/watch-live" class="btn btn-solid-maroon" style="margin-right: 16px;">WATCH LIVE &rarr;</a>
-          <a href="#/sermons" class="btn btn-outline-maroon">VIEW ALL SERMONS &rarr;</a>
+          <a href="#/worship/watch-live" class="btn btn-solid-maroon" style="margin-right: 16px;">WATCH LIVE &rarr;</a>
+          <a href="#/worship/sermons" class="btn btn-outline-maroon">VIEW ALL SERMONS &rarr;</a>
         </div>
       </div>
     `;
@@ -184,6 +188,14 @@ export class SermonsSection {
     this.container.className = 'section sermons-section';
     this.container.style.backgroundColor = 'var(--cream)';
     this.container.innerHTML = html;
+
+    // Wire WATCH / LISTEN buttons to open sermon URLs
+    this.container.querySelectorAll('.btn-sermon-watch, .btn-sermon-listen').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.dataset.url;
+        if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      });
+    });
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {

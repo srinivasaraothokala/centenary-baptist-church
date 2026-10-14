@@ -35,7 +35,7 @@ export class GetInvolvedSection {
             <div class="gi-arrow">&rarr;</div>
           </a>
           
-          <a href="#/giving" class="gi-block">
+          <a href="#/give" class="gi-block">
             <div class="gi-content">
               <h3>GIVE</h3>
               <p>Support the work of the church</p>

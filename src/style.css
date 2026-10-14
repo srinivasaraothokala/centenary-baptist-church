@@ -488,11 +488,11 @@ header.scrolled .brand-logo-full {
 }
 .hero .lede {
   font-size: 20px;
-  color: var(--secondary-gold);
+  color: #FFFFFF !important;
   margin-bottom: 28px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 .hero-actions {
   display: flex;
