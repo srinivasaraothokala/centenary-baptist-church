@@ -2,13 +2,26 @@ import { API_BASE } from './apiConfig.js';
 
 let settingsRequest;
 
-const isHttpUrl = (value) => {
+// Only accept fully-qualified http/https URLs (e.g. Supabase storage URLs).
+// Relative paths and empty values are intentionally rejected so they do
+// not overwrite the working default /new-logo.png and /home_page.png.
+const isAbsoluteHttpUrl = (value) => {
+  if (!value || typeof value !== 'string') return '';
   try {
-    const url = new URL(value, window.location.origin);
+    const url = new URL(value);
     return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
   } catch {
     return '';
   }
+};
+
+// Swap an image src only after confirming the new URL loads successfully.
+const safeSwapSrc = (element, newSrc) => {
+  if (!element || !newSrc) return;
+  const probe = new Image();
+  probe.onload = () => { element.src = newSrc; };
+  // On error, silently keep the existing src (the bundled default).
+  probe.src = newSrc;
 };
 
 const setText = (selector, value) => {
@@ -135,10 +148,10 @@ export function applyPublicSettings(settings = {}) {
   });
 
   const hero = document.querySelector('.hero-bg');
-  if (hero && isHttpUrl(appearance.defaultHeroImage)) hero.src = isHttpUrl(appearance.defaultHeroImage);
+  safeSwapSrc(hero, isAbsoluteHttpUrl(appearance.defaultHeroImage));
   const logo = document.querySelector('.brand-seal');
-  if (logo && isHttpUrl(church.logo)) logo.src = isHttpUrl(church.logo);
-  const favicon = isHttpUrl(church.favicon);
+  safeSwapSrc(logo, isAbsoluteHttpUrl(church.logo));
+  const favicon = isAbsoluteHttpUrl(church.favicon);
   if (favicon) document.querySelectorAll('link[rel~="icon"], link[rel="shortcut icon"]').forEach((link) => { link.href = favicon; });
 
   const title = seo.title || (church.name ? `${church.name}${church.establishedYear ? ` | Est. ${church.establishedYear}` : ''}` : '');
