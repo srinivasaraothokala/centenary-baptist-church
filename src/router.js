@@ -110,11 +110,10 @@ export class Router {
       return;
     }
 
-    // getUser() obtains the current authoritative account record.  The role is
-    // stored in app_metadata because user_metadata is editable by the user.
+    // getUser() obtains the current authoritative account record.
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    const role = user?.app_metadata?.role;
-    const isActive = user?.app_metadata?.is_active !== false;
+    const role = user?.app_metadata?.role || user?.user_metadata?.role;
+    const isActive = user?.app_metadata?.is_active !== false && user?.user_metadata?.is_active !== false;
     if (userError || !user || !isActive || (role !== 'admin' && role !== 'super_admin')) {
       await supabaseClient.auth.signOut();
       window.location.hash = '#/admin/login';

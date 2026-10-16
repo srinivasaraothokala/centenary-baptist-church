@@ -13,8 +13,8 @@ const supabaseAdmin = createClient(
 
 const isAdminRole = (role) => role === 'admin' || role === 'super_admin';
 const getAccess = (user) => ({
-  role: user?.app_metadata?.role || null,
-  is_active: user?.app_metadata?.is_active !== false
+  role: user?.app_metadata?.role || user?.user_metadata?.role || null,
+  is_active: (user?.app_metadata?.is_active !== false) && (user?.user_metadata?.is_active !== false)
 });
 
 const toAdminUser = (user) => {
@@ -49,19 +49,19 @@ async function getAdminUsers() {
     page += 1;
   }
 
-  return users.filter((user) => isAdminRole(user.app_metadata?.role));
+  return users.filter((user) => isAdminRole(getAccess(user).role));
 }
 
 async function ensureAnotherSuperAdmin(targetId) {
   const target = await getUserById(targetId);
-  if (target.app_metadata?.role !== 'super_admin') return target;
+  const targetAccess = getAccess(target);
+  if (targetAccess.role !== 'super_admin') return target;
 
   const users = await getAdminUsers();
-  const remaining = users.filter((user) =>
-    user.id !== targetId &&
-    user.app_metadata?.role === 'super_admin' &&
-    user.app_metadata?.is_active !== false
-  );
+  const remaining = users.filter((user) => {
+    const access = getAccess(user);
+    return user.id !== targetId && access.role === 'super_admin' && access.is_active;
+  });
 
   if (!remaining.length) {
     const error = new Error('At least one active Super Admin account must remain');

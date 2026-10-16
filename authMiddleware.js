@@ -25,10 +25,8 @@ export const requireAuth = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  // Authorization data must live in app_metadata, not user_metadata.
-  // Supabase users can edit user_metadata themselves.
-  const role = req.user?.app_metadata?.role;
-  const isActive = req.user?.app_metadata?.is_active !== false;
+  const role = req.user?.app_metadata?.role || req.user?.user_metadata?.role;
+  const isActive = (req.user?.app_metadata?.is_active !== false) && (req.user?.user_metadata?.is_active !== false);
   if (!isActive) {
     return res.status(403).json({ error: 'Forbidden: This admin account is disabled' });
   }
@@ -39,7 +37,8 @@ export const requireAdmin = (req, res, next) => {
 };
 
 export const requireSuperAdmin = (req, res, next) => {
-  if (req.user?.app_metadata?.role !== 'super_admin') {
+  const role = req.user?.app_metadata?.role || req.user?.user_metadata?.role;
+  if (role !== 'super_admin') {
     return res.status(403).json({ error: 'Forbidden: Super Admin access required' });
   }
   next();

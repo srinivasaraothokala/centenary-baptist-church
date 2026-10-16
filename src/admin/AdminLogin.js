@@ -24,8 +24,8 @@ export class AdminLogin {
 
       if (error) throw error;
 
-      const role = data.user?.app_metadata?.role;
-      const isActive = data.user?.app_metadata?.is_active !== false;
+      const role = data.user?.app_metadata?.role || data.user?.user_metadata?.role;
+      const isActive = data.user?.app_metadata?.is_active !== false && data.user?.user_metadata?.is_active !== false;
       if (!isActive || (role !== 'admin' && role !== 'super_admin')) {
         await supabaseClient.auth.signOut();
         throw new Error('This account does not have active admin access.');

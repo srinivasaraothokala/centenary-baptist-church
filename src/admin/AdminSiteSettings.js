@@ -27,7 +27,7 @@ export class AdminSiteSettings {
   async updateUserInfo() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     const name = session?.user?.user_metadata?.name || 'Admin User';
-    const role = session?.user?.app_metadata?.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+    const role = (session?.user?.app_metadata?.role || session?.user?.user_metadata?.role) === 'super_admin' ? 'Super Admin' : 'Administrator';
     const initial = name[0].toUpperCase();
     const el = document.querySelector('.user-avatar'); if (el) el.textContent = initial;
     const ne = document.querySelector('.user-info strong'); if (ne) ne.textContent = name;

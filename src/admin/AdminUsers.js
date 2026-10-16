@@ -217,7 +217,7 @@ export class AdminUsers {
 
   renderLayout() {
     const userName = this.session?.user?.user_metadata?.name || 'Admin User';
-    const userRole = this.session?.user?.app_metadata?.role === 'super_admin' ? 'Super Admin' : 'Admin';
+    const userRole = (this.session?.user?.app_metadata?.role || this.session?.user?.user_metadata?.role) === 'super_admin' ? 'Super Admin' : 'Admin';
     const userInitial = userName[0].toUpperCase();
 
     const pageContent = `
