@@ -1,4 +1,4 @@
-import { API_BASE } from '../apiConfig.js';
+import { getSiteSettings } from '../siteSettings.js';
 
 /**
  * Cookie Consent Manager
@@ -131,11 +131,8 @@ export function trackPageView(path) {
  */
 export async function fetchCookieSettings() {
   try {
-    const res = await fetch(`${API_BASE}/settings`);
-    if (res.ok) {
-      const data = await res.json();
-      return data.settings?.legal || {};
-    }
+    const settings = await getSiteSettings();
+    return settings.legal || {};
   } catch (err) {
     console.warn('[Cookie Consent] Failed to fetch settings, using defaults.', err);
   }

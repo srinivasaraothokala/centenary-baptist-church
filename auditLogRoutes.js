@@ -31,7 +31,7 @@ router.delete('/', requireAuth, requireAdmin, requireSuperAdmin, async (req, res
   try {
     const { error } = await supabase.from('audit_logs').delete().neq('id', 0);
     if (error) throw error;
-    await logAudit({ action: 'deleted', entityType: 'audit_logs', entityName: 'All logs cleared', ip: req.ip });
+    await logAudit({ action: 'deleted', entityType: 'audit_logs', entityName: 'All logs cleared', userEmail: req.user.email, ip: req.ip });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to clear logs' });

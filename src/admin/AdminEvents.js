@@ -49,8 +49,8 @@ export class AdminEvents {
     if (existing) existing.remove();
 
     document.body.insertAdjacentHTML('beforeend', `
-      <div id="admin-reg-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
-        <div style="background:white;border-radius:12px;width:100%;max-width:960px;padding:40px;text-align:center;color:#64748b;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+      <div id="admin-reg-modal" class="admin-reg-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
+        <div class="admin-reg-modal-panel" style="background:white;border-radius:12px;width:100%;max-width:960px;padding:40px;text-align:center;color:#64748b;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
           Loading registrations...
         </div>
       </div>`);
@@ -73,8 +73,8 @@ export class AdminEvents {
         : `${event?.date || ''} ${event?.month || ''}`;
 
       modal.innerHTML = `
-        <div style="background:white;border-radius:12px;width:100%;max-width:960px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-          <div style="padding:20px 28px;border-bottom:1px solid #e2e8f0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-shrink:0;">
+        <div class="admin-reg-modal-panel" style="background:white;border-radius:12px;width:100%;max-width:960px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+          <div class="admin-reg-modal-header" style="padding:20px 28px;border-bottom:1px solid #e2e8f0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-shrink:0;">
             <div>
               <p style="margin:0 0 2px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#b6893f;">Event Registrations</p>
               <h2 style="margin:0;font-family:'Playfair Display',serif;font-size:20px;color:#791c1c;">${eventName}</h2>
@@ -87,13 +87,13 @@ export class AdminEvents {
               <button id="admin-reg-close-btn" style="background:none;border:1px solid #e2e8f0;border-radius:6px;width:32px;height:32px;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;color:#64748b;">&#x00D7;</button>
             </div>
           </div>
-          <div style="padding:14px 28px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;gap:24px;flex-wrap:wrap;flex-shrink:0;font-size:13px;color:#374151;">
+          <div class="admin-reg-modal-meta" style="padding:14px 28px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;gap:24px;flex-wrap:wrap;flex-shrink:0;font-size:13px;color:#374151;">
             <span>&#128197; <strong>${eventDate}</strong> &middot; ${event?.time || ''}</span>
             <span>&#128205; ${event?.location || ''}</span>
             <span>&#128101; <strong id="modal-reg-count">${regs.length}</strong> Registration${regs.length !== 1 ? 's' : ''}</span>
           </div>
-          <div id="admin-reg-table-area" style="overflow-y:auto;flex:1;padding:0 28px 16px;"></div>
-          <div id="admin-reg-pagination" style="padding:12px 28px;border-top:1px solid #e2e8f0;flex-shrink:0;"></div>
+          <div id="admin-reg-table-area" class="admin-reg-table-area" style="overflow-y:auto;flex:1;padding:0 28px 16px;"></div>
+          <div id="admin-reg-pagination" class="admin-reg-pagination" style="padding:12px 28px;border-top:1px solid #e2e8f0;flex-shrink:0;"></div>
         </div>`;
 
       this._renderModalTable();
@@ -157,7 +157,7 @@ export class AdminEvents {
     const pageRegs = regs.slice(start, end);
 
     area.innerHTML = `
-      <table style="width:100%;border-collapse:collapse;margin-top:20px;table-layout:fixed;">
+      <table class="admin-reg-table" style="width:100%;border-collapse:collapse;margin-top:20px;table-layout:fixed;">
         <colgroup>
           <col style="width:36px"><col style="width:18%"><col style="width:22%">
           <col style="width:13%"><col style="width:8%"><col style="width:18%"><col style="width:16%">
@@ -396,7 +396,7 @@ export class AdminEvents {
 
         <div class="admin-card" style="grid-column: 1 / -1;">
           <div class="admin-card-header"><h3>All Events</h3></div>
-          <div style="overflow-x: auto;">
+          <div class="admin-table-scroll">
             <table class="admin-table" style="table-layout:fixed;width:100%;">
               <colgroup>
                 <col style="width:30%"><col style="width:15%"><col style="width:16%">

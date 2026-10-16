@@ -8,14 +8,28 @@ router.post('/', async (req, res) => {
   try {
     const { firstName, lastName, phone, email, city, heardAboutUs, visitIntent } = req.body;
 
+    const clean = (value, maxLength) => String(value || '').trim().slice(0, maxLength);
+    const safeFirstName = clean(firstName, 100);
+    const safePhone = clean(phone, 50);
+    const safeEmail = clean(email, 255);
+    if (!safeFirstName || !safePhone) {
+      return res.status(400).json({ error: 'First name and phone number are required.' });
+    }
+    if (safePhone.replace(/[^0-9+]/g, '').length < 8) {
+      return res.status(400).json({ error: 'Please provide a valid phone number.' });
+    }
+    if (safeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+
     const newVisitor = {
-      first_name: firstName,
-      last_name: lastName,
-      phone: phone,
-      email: email,
-      city: city,
-      heard_about_us: heardAboutUs,
-      visit_intent: visitIntent
+      first_name: safeFirstName,
+      last_name: clean(lastName, 100),
+      phone: safePhone,
+      email: safeEmail,
+      city: clean(city, 150),
+      heard_about_us: clean(heardAboutUs, 100),
+      visit_intent: clean(visitIntent, 100)
     };
 
     const { error } = await supabase.from('visitors').insert([newVisitor]);

@@ -9,7 +9,8 @@
     "dev:backend": "nodemon server.js",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate:admin-roles": "node scripts/migrateAdminRoles.js"
   },
   "devDependencies": {
     "concurrently": "^10.0.5",

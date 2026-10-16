@@ -1,4 +1,5 @@
 import { API_BASE } from './apiConfig.js';
+import { initializePublicSettings } from './siteSettings.js';
 import './style.css';
 import { initI18n, t, getCurrentLang } from './i18n.js';
 import { FirstTimeVisitorModal } from './components/VisitorModal.js';
@@ -211,19 +212,24 @@ function initModals() {
   });
 }
 
-async function initWatchLiveButton() {
+async function initWatchLiveButton(settingsPromise) {
   const btn = $('#btn-watch-live');
   if (!btn) return;
 
   let watchUrl = '#/worship/watch-live'; // fallback to internal page
   try {
-    const res = await fetch(`${API_BASE}/settings`);
-    if (res.ok) {
-      const data = await res.json();
-      const wl = data.settings?.watchLive;
-      if (wl?.enabled !== false && wl?.url) {
-        watchUrl = wl.url;
-      }
+    const settings = await settingsPromise;
+    const wl = settings.watchLive;
+    if (wl?.enabled !== false && wl?.url) {
+      watchUrl = wl.url;
+    }
+    if (wl?.showButton === false || wl?.enabled === false) {
+      btn.hidden = true;
+      return;
+    }
+    if (wl?.buttonText) {
+      const text = btn.querySelector('span') || btn;
+      text.textContent = wl.buttonText;
     }
   } catch (err) {
     console.warn('[Watch Live] Could not fetch settings, using fallback.');
@@ -248,7 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNavigation();
 
   initModals();
-  initWatchLiveButton();
+  const settingsPromise = initializePublicSettings();
+  initWatchLiveButton(settingsPromise);
   initScrollEffects();
 
   // Initialize SPA Router

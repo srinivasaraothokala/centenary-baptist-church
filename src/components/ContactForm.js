@@ -1,4 +1,5 @@
 import { API_BASE } from '../apiConfig.js';
+import { getSiteSettings } from '../siteSettings.js';
 import './ContactForm.css';
 
 export class ContactForm {
@@ -8,6 +9,14 @@ export class ContactForm {
     
     this.render();
     this.bindEvents();
+    this.applySiteSettings();
+  }
+
+  async applySiteSettings() {
+    const settings = await getSiteSettings();
+    if (settings.contactForm?.enabled === false) {
+      this.container.innerHTML = '';
+    }
   }
 
   render() {

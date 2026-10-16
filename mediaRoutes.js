@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { supabase } from './supabaseClient.js';
 import { requireAuth, requireAdmin } from './authMiddleware.js';
+import { logAudit } from './logAudit.js';
 const router = express.Router();
 import crypto from 'crypto';
 
@@ -59,19 +60,19 @@ router.get('/usage', requireAuth, requireAdmin, async (req, res) => {
 
     const [sermons, events, leaders, gallery, ministries, campus] = await Promise.allSettled([
       supabase.from('sermons').select('title, thumbnail_url'),
-      supabase.from('events').select('title, image_url'),
+      supabase.from('events').select('title, image'),
       supabase.from('leadership').select('name, image_url'),
       supabase.from('gallery').select('title, image_url'),
-      supabase.from('ministries').select('name, image_url'),
-      supabase.from('campus').select('name, image_url'),
+      supabase.from('ministries').select('title, image_url'),
+      supabase.from('campus').select('title, image_url'),
     ]);
 
     if (sermons.status === 'fulfilled') (sermons.value.data || []).forEach(s => addUsage(s.thumbnail_url, 'Sermons & Videos', s.title || 'Untitled'));
-    if (events.status === 'fulfilled')  (events.value.data  || []).forEach(e => addUsage(e.image_url, 'Events', e.title || 'Untitled'));
+    if (events.status === 'fulfilled')  (events.value.data  || []).forEach(e => addUsage(e.image, 'Events', e.title || 'Untitled'));
     if (leaders.status === 'fulfilled') (leaders.value.data || []).forEach(l => addUsage(l.image_url, 'Leadership', l.name || 'Unnamed'));
     if (gallery.status === 'fulfilled') (gallery.value.data || []).forEach(g => addUsage(g.image_url, 'Gallery', g.title || 'Gallery Image'));
-    if (ministries.status === 'fulfilled') (ministries.value.data || []).forEach(m => addUsage(m.image_url, 'Ministries', m.name || 'Ministry'));
-    if (campus.status === 'fulfilled')  (campus.value.data  || []).forEach(c => addUsage(c.image_url, 'Campus', c.name || 'Campus'));
+    if (ministries.status === 'fulfilled') (ministries.value.data || []).forEach(m => addUsage(m.image_url, 'Ministries', m.title || 'Ministry'));
+    if (campus.status === 'fulfilled')  (campus.value.data  || []).forEach(c => addUsage(c.image_url, 'Campus', c.title || 'Campus'));
 
     res.json(usageMap);
   } catch (err) {
@@ -99,6 +100,7 @@ router.post('/', requireAuth, requireAdmin, (req, res) => {
       if (error) { console.error('Supabase upload error:', error); return res.status(500).json({ error: 'Upload failed' }); }
 
       const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(fileName);
+      await logAudit({ action: 'uploaded', entityType: 'media', entityId: fileName, entityName: fileName, userEmail: req.user.email, ip: req.ip });
       res.status(201).json({ name: fileName, url: urlData.publicUrl });
     } catch (err) {
       console.error(err);
@@ -122,18 +124,18 @@ router.delete('/:filename', requireAuth, requireAdmin, async (req, res) => {
       const usages = [];
       const [s, e, l, g, m, c] = await Promise.allSettled([
         supabase.from('sermons').select('title').eq('thumbnail_url', publicUrl),
-        supabase.from('events').select('title').eq('image_url', publicUrl),
+        supabase.from('events').select('title').eq('image', publicUrl),
         supabase.from('leadership').select('name').eq('image_url', publicUrl),
         supabase.from('gallery').select('title').eq('image_url', publicUrl),
-        supabase.from('ministries').select('name').eq('image_url', publicUrl),
-        supabase.from('campus').select('name').eq('image_url', publicUrl),
+        supabase.from('ministries').select('title').eq('image_url', publicUrl),
+        supabase.from('campus').select('title').eq('image_url', publicUrl),
       ]);
       if (s.status === 'fulfilled') (s.value.data || []).forEach(x => usages.push({ module: 'Sermons & Videos', label: x.title }));
       if (e.status === 'fulfilled') (e.value.data || []).forEach(x => usages.push({ module: 'Events', label: x.title }));
       if (l.status === 'fulfilled') (l.value.data || []).forEach(x => usages.push({ module: 'Leadership', label: x.name }));
       if (g.status === 'fulfilled') (g.value.data || []).forEach(x => usages.push({ module: 'Gallery', label: x.title }));
-      if (m.status === 'fulfilled') (m.value.data || []).forEach(x => usages.push({ module: 'Ministries', label: x.name }));
-      if (c.status === 'fulfilled') (c.value.data || []).forEach(x => usages.push({ module: 'Campus', label: x.name }));
+      if (m.status === 'fulfilled') (m.value.data || []).forEach(x => usages.push({ module: 'Ministries', label: x.title }));
+      if (c.status === 'fulfilled') (c.value.data || []).forEach(x => usages.push({ module: 'Campus', label: x.title }));
 
       if (usages.length > 0) {
         return res.status(409).json({ error: 'File is currently in use', usages });
@@ -142,6 +144,7 @@ router.delete('/:filename', requireAuth, requireAdmin, async (req, res) => {
 
     const { error } = await supabase.storage.from(BUCKET).remove([filename]);
     if (error) { console.error('Supabase delete error:', error); return res.status(500).json({ error: 'Failed to delete file' }); }
+    await logAudit({ action: 'deleted', entityType: 'media', entityId: filename, entityName: filename, userEmail: req.user.email, ip: req.ip });
     res.json({ success: true });
   } catch (err) {
     console.error(err);

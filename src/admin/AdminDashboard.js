@@ -1,4 +1,7 @@
 import { AdminLayout } from './AdminLayout.js';
+import { API_BASE } from '../apiConfig.js';
+import { supabaseClient } from '../supabaseFrontendClient.js';
+import { escapeHtml } from './html.js';
 
 export class AdminDashboard {
   constructor(containerId) {
@@ -9,6 +12,98 @@ export class AdminDashboard {
     const headers = { Authorization: `Bearer ${session?.access_token}` };
     if (!isFormData) headers['Content-Type'] = 'application/json';
     return headers;
+  }
+
+  async getJson(url, headers = undefined) {
+    try {
+      const response = await fetch(url, headers ? { headers } : undefined);
+      if (!response.ok) return [];
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
+  sectionByTitle(title) {
+    return [...this.container.querySelectorAll('.dash-section')]
+      .find((section) => section.querySelector('h3')?.textContent.trim() === title);
+  }
+
+  async loadDashboard() {
+    const headers = await this.authHeaders();
+    const [events, sermons, ministries, campuses, contacts, visitors, media] = await Promise.all([
+      this.getJson(`${API_BASE}/events`),
+      this.getJson(`${API_BASE}/sermons`),
+      this.getJson(`${API_BASE}/ministries`),
+      this.getJson(`${API_BASE}/campus`),
+      this.getJson(`${API_BASE}/contact`, headers),
+      this.getJson(`${API_BASE}/visitor`, headers),
+      this.getJson(`${API_BASE}/media`, headers)
+    ]);
+
+    const statValues = this.container.querySelectorAll('.stat-value');
+    [events.length, sermons.length, ministries.filter((item) => item.is_active !== false).length,
+      campuses.filter((item) => item.is_active !== false).length,
+      contacts.length + visitors.length, media.length]
+      .forEach((value, index) => { if (statValues[index]) statValues[index].textContent = value; });
+    this.container.querySelectorAll('.stat-trend').forEach((trend) => {
+      trend.className = 'stat-trend';
+      trend.textContent = 'Live data';
+    });
+
+    const submissions = [
+      ...contacts.map((item) => ({
+        name: item.name || 'Unknown', type: 'Contact', message: item.message || '—',
+        date: item.date || item.created_at
+      })),
+      ...visitors.map((item) => ({
+        name: `${item.first_name || ''} ${item.last_name || ''}`.trim() || 'Unknown',
+        type: 'Visitor', message: item.visit_intent || 'New visitor', date: item.created_at
+      }))
+    ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+    const submissionSection = this.sectionByTitle('Recent Form Submissions');
+    const submissionBody = submissionSection?.querySelector('tbody');
+    if (submissionBody) {
+      submissionBody.innerHTML = submissions.length
+        ? submissions.map((item) => `<tr>
+            <td>${escapeHtml(item.name)}</td>
+            <td><span class="status-badge status-read">${escapeHtml(item.type)}</span></td>
+            <td>${escapeHtml(item.message)}</td>
+            <td>${item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
+            <td><span class="status-badge status-new">New</span></td>
+          </tr>`).join('')
+        : '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:24px;">No recent submissions.</td></tr>';
+    }
+
+    const sermonsSection = this.sectionByTitle('Recent Sermons');
+    if (sermonsSection) {
+      sermonsSection.querySelectorAll('.list-item').forEach((item) => item.remove());
+      const header = sermonsSection.querySelector('.dash-section-header');
+      const newest = sermons.slice(0, 3);
+      header?.insertAdjacentHTML('afterend', newest.length
+        ? newest.map((sermon) => `<div class="list-item">
+            <img src="${escapeHtml(sermon.thumbnail_url || '/images/cbc-logo-header.png')}" class="list-item-img" alt="">
+            <div class="list-item-content"><div class="list-item-title">${escapeHtml(sermon.title || 'Untitled')}</div><div class="list-item-sub">${escapeHtml(sermon.speaker || 'CBC')}</div></div>
+            <div class="list-item-sub" style="margin-right:24px;">${sermon.date ? new Date(sermon.date).toLocaleDateString('en-IN') : '—'}</div>
+          </div>`).join('')
+        : '<p style="padding:16px;color:#64748b;">No sermons published yet.</p>');
+    }
+
+    const eventsSection = this.sectionByTitle('Upcoming Events');
+    const eventsBody = eventsSection?.querySelector('tbody');
+    if (eventsBody) {
+      const upcoming = events.slice(0, 5);
+      eventsBody.innerHTML = upcoming.length
+        ? upcoming.map((event) => `<tr>
+            <td><div class="date-block"><span class="date-block-d">${escapeHtml(event.date || '—')}</span><span class="date-block-m">${escapeHtml(event.month || '')}</span></div></td>
+            <td><div style="font-weight:600;color:#1e293b;">${escapeHtml(event.title || 'Untitled')}</div><div style="font-size:.75rem;color:#64748b;">${escapeHtml(event.time || '')}</div></td>
+            <td>${escapeHtml(event.location || '—')}</td>
+            <td><span class="status-badge status-new">Published</span></td>
+          </tr>`).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:#64748b;padding:24px;">No upcoming events.</td></tr>';
+    }
   }
 
 
@@ -112,6 +207,7 @@ export class AdminDashboard {
               <h3>Recent Form Submissions</h3>
               <a href="#/admin/contacts">View All &rarr;</a>
             </div>
+            <div class="dash-table-scroll">
             <table class="dash-table">
               <thead>
                 <tr>
@@ -160,6 +256,7 @@ export class AdminDashboard {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           <div class="dash-section">
@@ -208,6 +305,7 @@ export class AdminDashboard {
               <h3>Upcoming Events</h3>
               <a href="#/admin/events">View All &rarr;</a>
             </div>
+            <div class="dash-table-scroll">
             <table class="dash-table">
               <thead>
                 <tr>
@@ -265,6 +363,7 @@ export class AdminDashboard {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           <div class="dash-section">
@@ -308,5 +407,6 @@ export class AdminDashboard {
     `;
 
     this.container.innerHTML = AdminLayout.getLayout(content, '/admin');
+    await this.loadDashboard();
   }
 }

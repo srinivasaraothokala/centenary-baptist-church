@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { supabase } from './supabaseClient.js';
 import { requireAuth, requireAdmin } from './authMiddleware.js';
+import { logAudit } from './logAudit.js';
 const router = express.Router();
 import crypto from 'crypto';
 
@@ -58,6 +59,7 @@ router.post('/', requireAuth, requireAdmin, (req, res) => {
         .from('public-images')
         .getPublicUrl(fileName);
 
+      await logAudit({ action: 'uploaded', entityType: 'media', entityId: fileName, entityName: fileName, userEmail: req.user.email, ip: req.ip });
       res.status(201).json({ url: publicUrlData.publicUrl });
     } catch (error) {
       console.error('Upload Error:', error);

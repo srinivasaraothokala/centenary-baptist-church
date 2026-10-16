@@ -1442,6 +1442,30 @@ header.scrolled .brand-logo-full {
   background: rgba(255,255,255,0.1);
   color: var(--white);
 }
+.ab-link {
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 4px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.ab-link:hover { background: rgba(255,255,255,0.12); }
+.site-maintenance-page {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--primary-green);
+  color: var(--white);
+  text-align: center;
+}
+.site-maintenance-content { max-width: 620px; }
+.site-maintenance-content h1 { margin: 0 0 14px; font-family: 'Playfair Display', serif; font-size: clamp(2rem, 6vw, 4rem); }
+.site-maintenance-content p { margin: 0; font-size: 1.1rem; line-height: 1.65; }
 
 @media (max-width: 768px) {
   .ab-content {

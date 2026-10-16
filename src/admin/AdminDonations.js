@@ -1,6 +1,7 @@
 import { API_BASE } from '../apiConfig.js';
 import { supabaseClient } from '../supabaseFrontendClient.js';
 import { AdminLayout } from './AdminLayout.js';
+import { escapeHtml } from './html.js';
 
 export class AdminDonations {
   constructor(containerId) {
@@ -22,12 +23,15 @@ export class AdminDonations {
       const configRes = await fetch(`${this.API_URL}/config`);
       if (configRes.ok) this.config = await configRes.json();
 
-      const donRes = await fetch(this.API_URL);
-      if (donRes.ok) this.donations = await donRes.json();
+      const donRes = await fetch(this.API_URL, { headers: await this.authHeaders() });
+      if (!donRes.ok) throw new Error('Failed to load donation history');
+      this.donations = await donRes.json();
       
       this.renderUI();
     } catch (err) {
       console.error(err);
+      this.donations = [];
+      alert('Donation history could not be loaded. Please refresh and try again.');
     }
   }
 
@@ -44,10 +48,9 @@ export class AdminDonations {
 
     try {
       const res = await fetch(`${this.API_URL}/config`, { method: 'POST', body: formData, headers: await this.authHeaders(true) });
-      if (res.ok) {
-        alert('Donation configuration updated!');
-        await this.fetchData();
-      }
+      if (!res.ok) throw new Error((await res.json()).error || 'Failed to save donation settings');
+      alert('Donation configuration updated!');
+      await this.fetchData();
     } catch (err) {
       console.error(err);
       alert('Failed to save config.');
@@ -90,7 +93,7 @@ export class AdminDonations {
                 <div class="admin-card-header">
                   <h3>Recent Donations</h3>
                 </div>
-                <div style="overflow-x: auto;">
+                <div class="admin-table-scroll">
                   <table class="admin-table">
                     <thead>
                       <tr>
@@ -122,7 +125,7 @@ export class AdminDonations {
     form.note.value = this.config.note;
     const qrPreview = this.container.querySelector('#current-qr-preview');
     if (this.config.qrCodeUrl) {
-      qrPreview.innerHTML = `<img src="${this.config.qrCodeUrl}" alt="QR Code" style="max-width: 150px; border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">`;
+      qrPreview.innerHTML = `<img src="${escapeHtml(this.config.qrCodeUrl)}" alt="QR Code" style="max-width: 150px; border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">`;
     } else {
       qrPreview.innerHTML = '<span style="color: #94a3b8; font-size: 0.85rem; display: block; margin-top: 10px;">No QR code uploaded yet.</span>';
     }
@@ -135,17 +138,18 @@ export class AdminDonations {
     }
 
     list.innerHTML = [...this.donations].reverse().map(don => {
-      const initial = don.anonymous ? 'A' : don.name.charAt(0).toUpperCase();
+      const donorName = String(don.name || 'Unknown');
+      const initial = don.anonymous ? 'A' : donorName.charAt(0).toUpperCase();
       const avatarClass = don.anonymous ? 'admin-avatar anon' : 'admin-avatar';
       const nameHtml = don.anonymous 
         ? 'Anonymous <span class="admin-badge anon-badge" style="margin-left: 8px;">Hidden</span>'
-        : don.name;
+        : escapeHtml(donorName);
         
       return `
       <tr>
         <td>
           <div class="td-primary">
-            <div class="${avatarClass}">${initial}</div>
+            <div class="${avatarClass}">${escapeHtml(initial)}</div>
             ${nameHtml}
           </div>
         </td>

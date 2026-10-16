@@ -1,6 +1,7 @@
 import { API_BASE } from '../apiConfig.js';
 import { supabaseClient } from '../supabaseFrontendClient.js';
 import { AdminLayout } from './AdminLayout.js';
+import { escapeHtml, safeMailto, safeTel } from './html.js';
 
 export class AdminVisitors {
   constructor(containerId) {
@@ -69,7 +70,7 @@ export class AdminVisitors {
           <div class="admin-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <h3>Submissions <span class="sidebar-badge" style="background:#f1f5f9;color:#64748b;font-size:12px;margin-left:8px;" id="visitor-count-badge">0</span></h3>
             
-            <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="admin-card-toolbar" style="display: flex; gap: 12px; align-items: center;">
               <div style="position: relative; max-width: 250px; width: 100%;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" id="admin-visitor-search" placeholder="Search visitors..." style="width: 100%; padding: 8px 12px 8px 32px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none;">
@@ -79,7 +80,7 @@ export class AdminVisitors {
               </button>
             </div>
           </div>
-          <div style="overflow-x: auto;">
+          <div class="admin-table-scroll">
             <table class="admin-table">
               <thead>
                 <tr>
@@ -149,16 +150,16 @@ export class AdminVisitors {
       const name = `${v.first_name || ''} ${v.last_name || ''}`.trim() || 'Unknown Visitor';
       const initial = name.charAt(0).toUpperCase();
       const submitted = new Date(v.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-      const emailHtml = v.email ? `<div style="margin-bottom: 4px;">📧 <a href="mailto:${v.email}" style="color: #38bdf8; text-decoration: none;">${v.email}</a></div>` : '';
-      const phoneHtml = v.phone ? `<div>📞 <a href="tel:${v.phone}" style="color: #94a3b8; text-decoration: none;">${v.phone}</a></div>` : '';
+      const emailHtml = v.email ? `<div style="margin-bottom: 4px;">📧 <a href="${safeMailto(v.email)}" style="color: #38bdf8; text-decoration: none;">${escapeHtml(v.email)}</a></div>` : '';
+      const phoneHtml = v.phone ? `<div>📞 <a href="${safeTel(v.phone)}" style="color: #94a3b8; text-decoration: none;">${escapeHtml(v.phone)}</a></div>` : '';
       
       return `
       <tr>
         <td style="min-width: 200px;">
           <div class="td-primary">
-            <div class="admin-avatar" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; border: 1px solid rgba(14, 165, 233, 0.3);">${initial}</div>
+            <div class="admin-avatar" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; border: 1px solid rgba(14, 165, 233, 0.3);">${escapeHtml(initial)}</div>
             <div>
-              <div style="font-weight: 600; color: #1e293b;">${name}</div>
+              <div style="font-weight: 600; color: #1e293b;">${escapeHtml(name)}</div>
             </div>
           </div>
         </td>
@@ -167,10 +168,10 @@ export class AdminVisitors {
           ${phoneHtml}
         </td>
         <td class="td-secondary" style="min-width: 150px;">
-          ${v.city || '<span style="color: #cbd5e1;">Not provided</span>'}
+          ${v.city ? escapeHtml(v.city) : '<span style="color: #cbd5e1;">Not provided</span>'}
         </td>
         <td class="td-secondary" style="min-width: 150px;">
-          <div style="margin-bottom: 4px;">${v.visit_intent || '<span style="color: #cbd5e1;">-</span>'}</div>
+          <div style="margin-bottom: 4px;">${v.visit_intent ? escapeHtml(v.visit_intent) : '<span style="color: #cbd5e1;">-</span>'}</div>
         </td>
         <td class="td-secondary" style="min-width: 150px;">
           ${submitted}
@@ -203,7 +204,7 @@ export class AdminVisitors {
     modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15, 23, 42, 0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;backdrop-filter:blur(4px);';
     
     modal.innerHTML = `
-      <div style="background:white;border-radius:12px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;">
+      <div class="admin-visitor-modal-panel" style="background:white;border-radius:12px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);position:relative;">
         <button id="admin-visitor-modal-close" style="position:absolute;top:16px;right:16px;background:rgba(241, 245, 249, 1);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#64748b;transition:0.2s;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -211,28 +212,28 @@ export class AdminVisitors {
         <div style="padding: 32px 32px 24px;">
           <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
             <div style="width:56px;height:56px;border-radius:50%;background:rgba(14, 165, 233, 0.1);color:#0ea5e9;border:1px solid rgba(14, 165, 233, 0.3);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;flex-shrink:0;">
-              ${name.charAt(0).toUpperCase()}
+              ${escapeHtml(name.charAt(0).toUpperCase())}
             </div>
             <div>
-              <h2 style="margin:0 0 4px;font-family:'Playfair Display',serif;font-size:24px;color:#0f172a;">${name}</h2>
+              <h2 style="margin:0 0 4px;font-family:'Playfair Display',serif;font-size:24px;color:#0f172a;">${escapeHtml(name)}</h2>
               <div style="color:#64748b;font-size:13px;">Submitted: ${submitted}</div>
             </div>
           </div>
 
           <div style="margin-bottom: 24px;">
             <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin:0 0 12px;font-weight:700;border-bottom:1px solid #f1f5f9;padding-bottom:8px;">Contact Information</h3>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="admin-visitor-contact-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
               <div>
                 <div style="font-size:12px;color:#64748b;margin-bottom:4px;">Phone</div>
-                <div style="font-size:14px;color:#1e293b;font-weight:500;">${v.phone ? `<a href="tel:${v.phone}" style="color:#0ea5e9;text-decoration:none;">${v.phone}</a>` : '-'}</div>
+                <div style="font-size:14px;color:#1e293b;font-weight:500;">${v.phone ? `<a href="${safeTel(v.phone)}" style="color:#0ea5e9;text-decoration:none;">${escapeHtml(v.phone)}</a>` : '-'}</div>
               </div>
               <div>
                 <div style="font-size:12px;color:#64748b;margin-bottom:4px;">Email</div>
-                <div style="font-size:14px;color:#1e293b;font-weight:500;">${v.email ? `<a href="mailto:${v.email}" style="color:#0ea5e9;text-decoration:none;">${v.email}</a>` : '-'}</div>
+                <div style="font-size:14px;color:#1e293b;font-weight:500;">${v.email ? `<a href="${safeMailto(v.email)}" style="color:#0ea5e9;text-decoration:none;">${escapeHtml(v.email)}</a>` : '-'}</div>
               </div>
               <div style="grid-column: 1 / -1;">
                 <div style="font-size:12px;color:#64748b;margin-bottom:4px;">City / Area</div>
-                <div style="font-size:14px;color:#1e293b;font-weight:500;">${v.city || '-'}</div>
+                <div style="font-size:14px;color:#1e293b;font-weight:500;">${escapeHtml(v.city || '-')}</div>
               </div>
             </div>
           </div>
@@ -242,11 +243,11 @@ export class AdminVisitors {
             <div style="display:grid;grid-template-columns:1fr;gap:16px;">
               <div>
                 <div style="font-size:12px;color:#64748b;margin-bottom:4px;">Planning to Visit?</div>
-                <div style="font-size:14px;color:#1e293b;font-weight:500;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;">${v.visit_intent || 'Not specified'}</div>
+                <div style="font-size:14px;color:#1e293b;font-weight:500;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;">${escapeHtml(v.visit_intent || 'Not specified')}</div>
               </div>
               <div>
                 <div style="font-size:12px;color:#64748b;margin-bottom:4px;">How did they hear about us?</div>
-                <div style="font-size:14px;color:#1e293b;font-weight:500;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;">${v.heard_about_us || 'Not specified'}</div>
+                <div style="font-size:14px;color:#1e293b;font-weight:500;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;">${escapeHtml(v.heard_about_us || 'Not specified')}</div>
               </div>
             </div>
           </div>

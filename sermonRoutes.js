@@ -28,7 +28,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     const newSermon = { ...req.body, id: crypto.randomUUID() };
     const { data, error } = await supabase.from('sermons').insert([newSermon]).select();
     if (error) throw error;
-    await logAudit({ action: 'created', entityType: 'sermon', entityId: data[0].id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'created', entityType: 'sermon', entityId: data[0].id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.status(201).json(data[0]);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create sermon' });
@@ -48,7 +48,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (!data || data.length === 0) {
       return res.status(404).json({ error: 'Sermon not found' });
     }
-    await logAudit({ action: 'updated', entityType: 'sermon', entityId: req.params.id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'updated', entityType: 'sermon', entityId: req.params.id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.json(data[0]);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update sermon' });
@@ -60,7 +60,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase.from('sermons').delete().eq('id', req.params.id).select();
     if (error) throw error;
-    await logAudit({ action: 'deleted', entityType: 'sermon', entityId: req.params.id, entityName: data?.[0]?.title, ip: req.ip });
+    await logAudit({ action: 'deleted', entityType: 'sermon', entityId: req.params.id, entityName: data?.[0]?.title, userEmail: req.user.email, ip: req.ip });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete sermon' });

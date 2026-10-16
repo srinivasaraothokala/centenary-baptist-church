@@ -217,7 +217,7 @@ export class AdminUsers {
 
   renderLayout() {
     const userName = this.session?.user?.user_metadata?.name || 'Admin User';
-    const userRole = this.session?.user?.user_metadata?.role === 'super_admin' ? 'Super Admin' : 'Admin';
+    const userRole = this.session?.user?.app_metadata?.role === 'super_admin' ? 'Super Admin' : 'Admin';
     const userInitial = userName[0].toUpperCase();
 
     const pageContent = `
@@ -231,8 +231,8 @@ export class AdminUsers {
         .au-stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .au-stat-num { font-size: 28px; font-weight: 700; line-height: 1; }
         .au-stat-label { font-size: 12px; color: #6b7280; font-weight: 500; margin-top: 2px; }
-        .au-table-wrap { background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
-        .au-table-wrap table { width: 100%; border-collapse: collapse; }
+        .au-table-wrap { background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+        .au-table-wrap table { width: 100%; min-width: 620px; border-collapse: collapse; }
         .au-table-wrap th { padding: 13px 20px; font-size: 11px; font-weight: 600; color: #6b7280; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; background: #fafafa; }
         .au-table-wrap td { padding: 15px 20px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
         .au-table-wrap tr:last-child td { border-bottom: none; }
@@ -313,7 +313,7 @@ export class AdminUsers {
           </div>
         </div>
 
-        <div class="au-table-wrap">
+        <div class="au-table-wrap admin-table-scroll">
           <table>
             <thead>
               <tr>

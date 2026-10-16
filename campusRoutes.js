@@ -64,7 +64,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       throw error;
     }
     
-    await logAudit({ action: 'created', entityType: 'campus', entityId: data[0].id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'created', entityType: 'campus', entityId: data[0].id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.status(201).json(data[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create campus location' });
@@ -80,7 +80,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     const { data, error } = await supabase.from('campus').update(updateData).eq('id', req.params.id).select();
     if (error) throw error;
     if (!data || !data.length) return res.status(404).json({ error: 'Campus location not found' });
-    await logAudit({ action: 'updated', entityType: 'campus', entityId: req.params.id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'updated', entityType: 'campus', entityId: req.params.id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.json(data[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update campus location' });
@@ -93,7 +93,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     const { data, error } = await supabase.from('campus').delete().eq('id', req.params.id).select();
     if (error) throw error;
     if (!data || !data.length) return res.status(404).json({ error: 'Campus location not found' });
-    await logAudit({ action: 'deleted', entityType: 'campus', entityId: req.params.id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'deleted', entityType: 'campus', entityId: req.params.id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete campus location' });

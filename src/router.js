@@ -1,26 +1,31 @@
-import { PageRenderer } from './pages/PageRenderer.js';
 import { trackPageView } from './cookie/cookieConsent.js';
 import { ContactForm } from './components/ContactForm.js';
 import { FirstTimeVisitorModal } from './components/VisitorModal.js';
-import { FaithfulnessTimeline } from './components/FaithfulnessTimeline.js';
-import { AdminEvents } from './admin/AdminEvents.js';
-import { AdminDonations } from './admin/AdminDonations.js';
-import { AdminContacts } from './admin/AdminContacts.js';
-import { AdminDashboard } from './admin/AdminDashboard.js';
-import { AdminGallery } from './admin/AdminGallery.js';
-import { AdminSermons } from './admin/AdminSermons.js';
-import { AdminLogin } from './admin/AdminLogin.js';
-import { AdminUsers } from './admin/AdminUsers.js';
-import { AdminSiteSettings } from './admin/AdminSiteSettings.js';
-import { AdminMinistries } from './admin/AdminMinistries.js';
-import { AdminCampus } from './admin/AdminCampus.js';
-import { AdminMedia } from './admin/AdminMedia.js';
-import { AdminAuditLogs } from './admin/AdminAuditLogs.js';
-import { AdminLeadership } from './admin/AdminLeadership.js';
-import { AdminVisitors } from './admin/AdminVisitors.js';
-import { GalleryPage } from './pages/GalleryPage.js';
-import { PastorTeamPage } from './pages/PastorTeamPage.js';
 import { supabaseClient } from './supabaseFrontendClient.js';
+
+// Public visitors do not need the CMS or internal-page modules on their first
+// page view. Loading them only when their route is opened reduces the initial
+// JavaScript payload and keeps the admin code out of the public entry bundle.
+const lazyModules = {
+  renderer: () => import('./pages/PageRenderer.js'),
+  galleryPage: () => import('./pages/GalleryPage.js'),
+  pastorTeamPage: () => import('./pages/PastorTeamPage.js'),
+  adminEvents: () => import('./admin/AdminEvents.js'),
+  adminDonations: () => import('./admin/AdminDonations.js'),
+  adminContacts: () => import('./admin/AdminContacts.js'),
+  adminDashboard: () => import('./admin/AdminDashboard.js'),
+  adminGallery: () => import('./admin/AdminGallery.js'),
+  adminSermons: () => import('./admin/AdminSermons.js'),
+  adminLogin: () => import('./admin/AdminLogin.js'),
+  adminUsers: () => import('./admin/AdminUsers.js'),
+  adminSiteSettings: () => import('./admin/AdminSiteSettings.js'),
+  adminMinistries: () => import('./admin/AdminMinistries.js'),
+  adminCampus: () => import('./admin/AdminCampus.js'),
+  adminMedia: () => import('./admin/AdminMedia.js'),
+  adminAuditLogs: () => import('./admin/AdminAuditLogs.js'),
+  adminLeadership: () => import('./admin/AdminLeadership.js'),
+  adminVisitors: () => import('./admin/AdminVisitors.js')
+};
 
 export class Router {
   constructor() {
@@ -29,24 +34,6 @@ export class Router {
     this.mainHeader = document.querySelector('header');
     this.mainFooter = document.querySelector('footer');
     this.topBar = document.querySelector('.top-bar');
-    this.renderer = new PageRenderer('page-content');
-    this.adminEvents = new AdminEvents('page-content');
-    this.adminDonations = new AdminDonations('page-content');
-    this.adminContacts = new AdminContacts('page-content');
-    this.adminDashboard = new AdminDashboard('page-content');
-    this.adminGallery = new AdminGallery('page-content');
-    this.adminSermons = new AdminSermons('page-content');
-    this.adminLogin = new AdminLogin('page-content');
-    this.adminUsers = new AdminUsers('page-content');
-    this.adminSiteSettings = new AdminSiteSettings('page-content');
-    this.adminMinistries = new AdminMinistries('page-content');
-    this.adminCampus = new AdminCampus('page-content');
-    this.adminMedia = new AdminMedia('page-content');
-    this.adminAuditLogs = new AdminAuditLogs('page-content');
-    this.adminLeadership = new AdminLeadership('page-content');
-    this.adminVisitors = new AdminVisitors('page-content');
-    this.galleryPage = new GalleryPage('page-content');
-    this.pastorTeamPage = new PastorTeamPage('page-content');
 
     
     // Bind routing events
@@ -85,8 +72,17 @@ export class Router {
     } else if (hash.startsWith('#/admin')) {
       await this.showAdmin(hash);
     } else {
-      this.showInternalPage(hash.replace('#', ''));
+      await this.showInternalPage(hash.replace('#', ''));
     }
+  }
+
+  async getLazyComponent(key, exportName) {
+    if (!this[key]) {
+      const module = await lazyModules[key]();
+      const Component = module[exportName];
+      this[key] = new Component('page-content');
+    }
+    return this[key];
   }
 
   async showAdmin(hash) {
@@ -103,7 +99,7 @@ export class Router {
     }
 
     if (hash === '#/admin/login') {
-      this.adminLogin.render();
+      (await this.getLazyComponent('adminLogin', 'AdminLogin')).render();
       return;
     }
 
@@ -114,11 +110,17 @@ export class Router {
       return;
     }
 
-    const role = session.user?.user_metadata?.role;
-    if (role !== 'admin' && role !== 'super_admin') {
-      window.location.hash = '#/';
+    // getUser() obtains the current authoritative account record.  The role is
+    // stored in app_metadata because user_metadata is editable by the user.
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    const role = user?.app_metadata?.role;
+    const isActive = user?.app_metadata?.is_active !== false;
+    if (userError || !user || !isActive || (role !== 'admin' && role !== 'super_admin')) {
+      await supabaseClient.auth.signOut();
+      window.location.hash = '#/admin/login';
       return;
     }
+    const adminSession = { ...session, user };
 
     // Super Admin only — Admin Users page
     if (hash === '#/admin/users') {
@@ -189,7 +191,7 @@ export class Router {
         `;
         return;
       }
-      this.adminUsers.render(session);
+      (await this.getLazyComponent('adminUsers', 'AdminUsers')).render(adminSession);
       return;
     }
 
@@ -214,34 +216,38 @@ export class Router {
         `;
         return;
       }
-      this.adminSiteSettings.render();
+      (await this.getLazyComponent('adminSiteSettings', 'AdminSiteSettings')).render();
       return;
     }
 
     if (hash === '#/admin/donations') {
-      this.adminDonations.render();
+      (await this.getLazyComponent('adminDonations', 'AdminDonations')).render();
     } else if (hash === '#/admin/contacts') {
-      this.adminContacts.render();
+      (await this.getLazyComponent('adminContacts', 'AdminContacts')).render();
     } else if (hash === '#/admin/events') {
-      this.adminEvents.render();
+      (await this.getLazyComponent('adminEvents', 'AdminEvents')).render();
     } else if (hash === '#/admin/gallery') {
-      this.adminGallery.render();
+      (await this.getLazyComponent('adminGallery', 'AdminGallery')).render();
     } else if (hash === '#/admin/sermons') {
-      this.adminSermons.render();
+      (await this.getLazyComponent('adminSermons', 'AdminSermons')).render();
     } else if (hash === '#/admin/ministries') {
-      this.adminMinistries.render();
+      (await this.getLazyComponent('adminMinistries', 'AdminMinistries')).render();
     } else if (hash === '#/admin/campus') {
-      this.adminCampus.render();
+      (await this.getLazyComponent('adminCampus', 'AdminCampus')).render();
     } else if (hash === '#/admin/media') {
-      this.adminMedia.render();
+      (await this.getLazyComponent('adminMedia', 'AdminMedia')).render();
     } else if (hash === '#/admin/logs') {
-      this.adminAuditLogs.render();
+      if (role !== 'super_admin') {
+        window.location.hash = '#/admin';
+        return;
+      }
+      (await this.getLazyComponent('adminAuditLogs', 'AdminAuditLogs')).render();
     } else if (hash === '#/admin/leadership') {
-      this.adminLeadership.render();
+      (await this.getLazyComponent('adminLeadership', 'AdminLeadership')).render();
     } else if (hash === '#/admin/visitors') {
-      this.adminVisitors.render();
+      (await this.getLazyComponent('adminVisitors', 'AdminVisitors')).render();
     } else {
-      this.adminDashboard.render();
+      (await this.getLazyComponent('adminDashboard', 'AdminDashboard')).render();
     }
   }
 
@@ -257,7 +263,7 @@ export class Router {
     // Re-bind homepage forms if necessary (already bound in main.js on DOMContentLoaded, so this is fine)
   }
 
-  showInternalPage(path) {
+  async showInternalPage(path) {
     this.homepageView.style.display = 'none';
     this.pageContentContainer.style.display = 'block';
     if (this.mainHeader) this.mainHeader.style.display = 'block';
@@ -266,18 +272,18 @@ export class Router {
 
     // Gallery — own full-page layout (hero + grid + lightbox)
     if (path === '/gallery') {
-      this.galleryPage.render();
+      (await this.getLazyComponent('galleryPage', 'GalleryPage')).render();
       return;
     }
 
     // Pastor Team
     if (path === '/pastor-team' || path.startsWith('/pastor-team/')) {
-      this.pastorTeamPage.render(path);
+      (await this.getLazyComponent('pastorTeamPage', 'PastorTeamPage')).render(path);
       return;
     }
 
     // Render the specific page content
-    this.renderer.render(path);
+    (await this.getLazyComponent('renderer', 'PageRenderer')).render(path);
     
     // Special case: if it's the contact page, bind the contact form
     if (path === '/visit/contact' || path === '/visit' || path === '/visit/plan') {
@@ -291,8 +297,9 @@ export class Router {
     }
     
     // Special case: initialize the FaithfulnessTimeline if it exists on the rendered page
-    setTimeout(() => {
+    setTimeout(async () => {
       if (document.getElementById('about-faithfulness-timeline')) {
+        const { FaithfulnessTimeline } = await import('./components/FaithfulnessTimeline.js');
         new FaithfulnessTimeline('#about-faithfulness-timeline');
       }
     }, 50);

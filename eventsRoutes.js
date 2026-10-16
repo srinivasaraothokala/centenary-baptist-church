@@ -28,7 +28,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     const newEvent = { ...req.body, id: crypto.randomUUID() };
     const { data, error } = await supabase.from('events').insert([newEvent]).select();
     if (error) throw error;
-    await logAudit({ action: 'created', entityType: 'event', entityId: data[0].id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'created', entityType: 'event', entityId: data[0].id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.status(201).json(data[0]);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create event' });
@@ -48,7 +48,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (!data || data.length === 0) {
       return res.status(404).json({ error: 'Event not found' });
     }
-    await logAudit({ action: 'updated', entityType: 'event', entityId: req.params.id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'updated', entityType: 'event', entityId: req.params.id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.json(data[0]);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update event' });
@@ -63,7 +63,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (!data || data.length === 0) {
       return res.status(404).json({ error: 'Event not found' });
     }
-    await logAudit({ action: 'deleted', entityType: 'event', entityId: req.params.id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'deleted', entityType: 'event', entityId: req.params.id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete event' });
@@ -132,10 +132,13 @@ router.get('/:id/registrations/export', requireAuth, requireAdmin, async (req, r
     const escapeCSV = (val) => {
       if (val === null || val === undefined) return '';
       const str = String(val);
-      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-        return `"${str.replace(/"/g, '""')}"`;
+      // Spreadsheet programs can execute cells beginning with these characters
+      // as formulas. Prefix a quote before creating the CSV field.
+      const safeStr = /^[=+\-@]/.test(str) ? `'${str}` : str;
+      if (safeStr.includes(',') || safeStr.includes('"') || safeStr.includes('\n')) {
+        return `"${safeStr.replace(/"/g, '""')}"`;
       }
-      return str;
+      return safeStr;
     };
 
     const rows = registrations.map(r => [
@@ -169,6 +172,19 @@ router.post('/:id/register', async (req, res) => {
     if (!full_name || !email || !phone) {
       return res.status(400).json({ error: 'Name, email, and phone are required.' });
     }
+
+    const safeName = String(full_name).trim().substring(0, 100);
+    const safeEmail = String(email).trim().substring(0, 100);
+    const safePhone = String(phone).trim().substring(0, 20);
+    if (!safeName) {
+      return res.status(400).json({ error: 'Please provide a valid name.' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+    if (safePhone.replace(/[^0-9+]/g, '').length < 8) {
+      return res.status(400).json({ error: 'Please provide a valid phone number.' });
+    }
     
     const count = parseInt(attendee_count) || 1;
     if (count < 1) {
@@ -193,9 +209,9 @@ router.post('/:id/register', async (req, res) => {
     // 2. Insert registration
     const newRegistration = {
       event_id: req.params.id,
-      full_name: full_name.trim().substring(0, 100),
-      email: email.trim().substring(0, 100),
-      phone: phone.trim().substring(0, 20),
+      full_name: safeName,
+      email: safeEmail,
+      phone: safePhone,
       attendee_count: count,
       notes: notes ? notes.trim().substring(0, 500) : null
     };

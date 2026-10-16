@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import { supabase } from './supabaseClient.js';
 import { requireAuth, requireAdmin } from './authMiddleware.js';
+import { logAudit } from './logAudit.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -89,6 +90,8 @@ router.post('/config', requireAuth, requireAdmin, (req, res) => {
         .single();
         
       if (updateErr) throw updateErr;
+
+      await logAudit({ action: 'updated', entityType: 'donation_config', entityId: existing.id, entityName: 'Donation configuration', userEmail: req.user.email, ip: req.ip });
 
       res.json({ note: updatedConfig.note, qrCodeUrl: updatedConfig.qr_code_url });
     } catch (err) {

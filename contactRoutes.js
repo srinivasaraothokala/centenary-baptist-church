@@ -32,14 +32,21 @@ router.post('/', async (req, res) => {
     const ip = req.ip || req.connection.remoteAddress;
     const { firstName, lastName, phone, email, message, honeypot } = req.body;
 
+    const { data: settingsRow, error: settingsError } = await supabase
+      .from('site_settings')
+      .select('settings')
+      .eq('id', 1)
+      .maybeSingle();
+    if (settingsError) throw settingsError;
+    const formSettings = settingsRow?.settings?.contactForm || {};
+    if (formSettings.enabled === false) {
+      return res.status(503).json({ error: 'The contact form is temporarily unavailable.' });
+    }
+
     // Honeypot check
     if (honeypot) {
       console.warn(`Spam bot caught from IP: ${ip}`);
       return res.status(200).json({ success: true, message: 'Message sent successfully.' });
-    }
-
-    if (!firstName || !lastName || !phone || !email || !message) {
-      return res.status(400).json({ error: 'All fields are required.' });
     }
 
     const safeFirstName = String(firstName).trim().substring(0, 100);
@@ -48,6 +55,17 @@ router.post('/', async (req, res) => {
     const safeEmail = String(email).trim().substring(0, 255);
     const safeMessage = String(message).trim().substring(0, 5000);
     const fullName = `${safeFirstName} ${safeLastName}`;
+
+    if (!safeFirstName || !safeLastName || !safePhone || !safeEmail || !safeMessage) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+    if (safePhone.replace(/[^0-9+]/g, '').length < 8) {
+      return res.status(400).json({ error: 'Please provide a valid phone number.' });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
 
     const newContact = {
       name: fullName,
@@ -63,16 +81,26 @@ router.post('/', async (req, res) => {
       throw error;
     }
 
-    // Optional: Send email
+    // Optional: Send staff notification and a visitor auto-reply.
     if (process.env.SMTP_USER) {
       try {
+        const notificationEmail = formSettings.notificationEmail || process.env.CONTACT_EMAIL || 'support@cbcsecbad.in';
         await transporter.sendMail({
           from: process.env.MAIL_FROM || `"Website Contact" <${process.env.SMTP_USER}>`,
-          to: process.env.CONTACT_EMAIL || 'support@cbcsecbad.in',
+          to: notificationEmail,
           replyTo: safeEmail,
           subject: 'New Website Contact',
           text: `Name: ${fullName}\nPhone: ${safePhone}\nEmail: ${safeEmail}\n\nMessage:\n${safeMessage}`,
         });
+
+        if (formSettings.autoReplyEnabled && formSettings.autoReplyMessage) {
+          await transporter.sendMail({
+            from: process.env.MAIL_FROM || `"Centenary Baptist Church" <${process.env.SMTP_USER}>`,
+            to: safeEmail,
+            subject: 'Thank you for contacting Centenary Baptist Church',
+            text: String(formSettings.autoReplyMessage).substring(0, 5000),
+          });
+        }
       } catch (e) {
         console.error("Email send failed, but saved to DB.");
       }

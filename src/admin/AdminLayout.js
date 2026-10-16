@@ -1,12 +1,19 @@
+import './admin.css';
+
 export class AdminLayout {
   static getLayout(content, activePath) {
     const isActive = (path) => activePath === path ? 'active' : '';
 
+    // Components replace their container's markup after this method returns. Defer
+    // binding until that replacement is in the document, while keeping the
+    // listener itself delegated and idempotent across route changes.
+    window.requestAnimationFrame(() => this.bindResponsiveNavigation());
+
     return `
       <div class="admin-wrapper">
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin navigation">
           <div class="admin-sidebar-header">
-            <img src="/images/cbc-logo.jpg" alt="Centenary Baptist Church" style="border-radius:50%;" onerror="this.style.display='none'">
+            <img src="/images/cbc-logo-header.png" alt="Centenary Baptist Church" style="border-radius:50%;" onerror="this.style.display='none'">
             <div>
               <h1>CENTENARY<br>BAPTIST CHURCH</h1>
               <span>Admin Panel</span>
@@ -85,15 +92,22 @@ export class AdminLayout {
             <span style="font-size: 0.7rem; font-family: 'Inter', sans-serif;">1 Cor. 1:23</span>
           </div>
         </aside>
+        <button type="button" class="admin-sidebar-backdrop" aria-label="Close navigation" tabindex="-1"></button>
 
         <main class="admin-main">
           <div class="admin-topbar">
+            <button type="button" class="admin-menu-toggle" data-admin-menu-toggle aria-label="Open navigation" aria-controls="admin-sidebar" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
             <div class="topbar-left">
-              <h2>Centenary Baptist Church, Secunderabad</h2>
+              <h2><span class="topbar-title-full">Centenary Baptist Church, Secunderabad</span><span class="topbar-title-short">CBC Admin</span></h2>
               <span>Content Management System</span>
             </div>
             <div class="topbar-right">
-              <div class="topbar-search">
+              <button type="button" class="admin-search-toggle" data-admin-search-toggle aria-label="Open search" aria-controls="admin-global-search" aria-expanded="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+              </button>
+              <div class="topbar-search" id="admin-global-search">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
                 <input type="text" placeholder="Search anything...">
               </div>
@@ -116,5 +130,57 @@ export class AdminLayout {
         </main>
       </div>
     `;
+  }
+
+  static bindResponsiveNavigation() {
+    if (this.responsiveNavigationBound) return;
+    this.responsiveNavigationBound = true;
+
+    document.addEventListener('click', (event) => {
+      const toggle = event.target.closest('[data-admin-menu-toggle]');
+      if (toggle) {
+        const wrapper = toggle.closest('.admin-wrapper');
+        this.setSidebarOpen(wrapper, !wrapper?.classList.contains('admin-sidebar-open'));
+        return;
+      }
+
+      if (event.target.closest('.admin-sidebar-backdrop') || event.target.closest('.admin-sidebar .admin-nav a')) {
+        this.setSidebarOpen(document.querySelector('.admin-wrapper'), false);
+        return;
+      }
+
+      const searchToggle = event.target.closest('[data-admin-search-toggle]');
+      if (searchToggle) {
+        const wrapper = searchToggle.closest('.admin-wrapper');
+        const open = !wrapper?.classList.contains('admin-search-open');
+        wrapper?.classList.toggle('admin-search-open', open);
+        searchToggle.setAttribute('aria-expanded', String(open));
+        searchToggle.setAttribute('aria-label', open ? 'Close search' : 'Open search');
+        if (open) wrapper?.querySelector('.topbar-search input')?.focus();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const wrapper = document.querySelector('.admin-wrapper');
+      this.setSidebarOpen(wrapper, false);
+      if (wrapper?.classList.contains('admin-search-open')) {
+        wrapper.classList.remove('admin-search-open');
+        const searchToggle = wrapper.querySelector('[data-admin-search-toggle]');
+        searchToggle?.setAttribute('aria-expanded', 'false');
+        searchToggle?.setAttribute('aria-label', 'Open search');
+      }
+    });
+  }
+
+  static setSidebarOpen(wrapper, open) {
+    if (!wrapper) return;
+
+    wrapper.classList.toggle('admin-sidebar-open', open);
+    document.body.classList.toggle('admin-drawer-open', open);
+
+    const toggle = wrapper.querySelector('[data-admin-menu-toggle]');
+    toggle?.setAttribute('aria-expanded', String(open));
+    toggle?.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
   }
 }

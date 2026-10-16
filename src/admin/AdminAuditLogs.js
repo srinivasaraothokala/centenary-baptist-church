@@ -1,6 +1,7 @@
 import { API_BASE } from '../apiConfig.js';
 import { supabaseClient } from '../supabaseFrontendClient.js';
 import { AdminLayout } from './AdminLayout.js';
+import { escapeHtml } from './html.js';
 
 const ACTION_COLORS = {
   created:  { bg: '#f0fdf4', color: '#16a34a', dot: '#22c55e' },
@@ -48,7 +49,7 @@ export class AdminAuditLogs {
     if (tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:48px;color:#94a3b8;">Loading logs…</td></tr>`;
 
     try {
-      const res = await fetch(`${this.API_URL}?limit=500`);
+      const res = await fetch(`${this.API_URL}?limit=500`, { headers: await this.authHeaders() });
       if (!res.ok) throw new Error('Failed');
       this.logs     = await res.json();
       this.filtered = [...this.logs];
@@ -138,7 +139,7 @@ export class AdminAuditLogs {
       const icon   = ENTITY_ICONS[log.entity_type] || '📝';
       const time   = log.created_at ? new Date(log.created_at).toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
       const badge  = `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:${ac.bg};color:${ac.color};font-size:11px;font-weight:700;text-transform:capitalize;">
-        <span style="width:6px;height:6px;border-radius:50%;background:${ac.dot};display:inline-block;"></span>${log.action}
+        <span style="width:6px;height:6px;border-radius:50%;background:${ac.dot};display:inline-block;"></span>${escapeHtml(log.action)}
       </span>`;
 
       return `
@@ -149,15 +150,15 @@ export class AdminAuditLogs {
             <div style="display:flex;align-items:center;gap:8px;">
               <span style="font-size:18px;">${icon}</span>
               <div>
-                <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:capitalize;">${log.entity_type || '—'}</div>
-                <div style="font-size:13px;font-weight:600;color:#1e293b;">${log.entity_name || '—'}</div>
+                <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:capitalize;">${escapeHtml(log.entity_type || '—')}</div>
+                <div style="font-size:13px;font-weight:600;color:#1e293b;">${escapeHtml(log.entity_name || '—')}</div>
               </div>
             </div>
           </td>
-          <td style="padding:14px 16px;font-size:13px;color:#374151;">${log.user_email || '<span style="color:#94a3b8;">—</span>'}</td>
-          <td style="padding:14px 16px;font-size:12px;color:#94a3b8;">${log.ip_address || '—'}</td>
+          <td style="padding:14px 16px;font-size:13px;color:#374151;">${log.user_email ? escapeHtml(log.user_email) : '<span style="color:#94a3b8;">—</span>'}</td>
+          <td style="padding:14px 16px;font-size:12px;color:#94a3b8;">${escapeHtml(log.ip_address || '—')}</td>
           <td style="padding:14px 16px;max-width:200px;">
-            ${log.details ? `<details style="font-size:11px;color:#64748b;cursor:pointer;"><summary style="font-weight:600;color:#475569;">View details</summary><pre style="margin:6px 0 0;font-size:10px;background:#f8fafc;padding:8px;border-radius:6px;overflow:auto;max-height:80px;">${JSON.stringify(log.details, null, 2)}</pre></details>` : '<span style="color:#cbd5e1;font-size:12px;">—</span>'}
+            ${log.details ? `<details style="font-size:11px;color:#64748b;cursor:pointer;"><summary style="font-weight:600;color:#475569;">View details</summary><pre style="margin:6px 0 0;font-size:10px;background:#f8fafc;padding:8px;border-radius:6px;overflow:auto;max-height:80px;">${escapeHtml(JSON.stringify(log.details, null, 2))}</pre></details>` : '<span style="color:#cbd5e1;font-size:12px;">—</span>'}
           </td>
         </tr>
       `;
@@ -224,7 +225,7 @@ export class AdminAuditLogs {
             <h3 style="margin:0 0 4px;">Activity Log</h3>
             <p style="margin:0;font-size:12px;color:#94a3b8;" id="al-stat-showing">Loading…</p>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div class="admin-card-toolbar" style="display:flex;gap:8px;align-items:center;">
             <button id="al-refresh-btn" style="padding:8px 16px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;">↻ Refresh</button>
             <button id="al-clear-btn" style="padding:8px 16px;border:none;border-radius:8px;background:#fee2e2;font-size:13px;font-weight:600;color:#dc2626;cursor:pointer;">🗑 Clear All</button>
           </div>
@@ -237,7 +238,7 @@ export class AdminAuditLogs {
           <input type="text" id="al-search" placeholder="Search by name, email, action…">
         </div>
 
-        <div style="overflow-x:auto;">
+        <div class="admin-table-scroll">
           <table class="al-table">
             <thead>
               <tr>

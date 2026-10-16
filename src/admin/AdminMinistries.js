@@ -474,7 +474,7 @@ export class AdminMinistries {
             Add Ministry
           </button>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="admin-table-scroll">
           <table class="am-table">
             <thead>
               <tr>

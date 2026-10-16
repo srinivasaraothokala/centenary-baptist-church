@@ -27,16 +27,18 @@ export class AdminSiteSettings {
   async updateUserInfo() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     const name = session?.user?.user_metadata?.name || 'Admin User';
-    const role = session?.user?.user_metadata?.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+    const role = session?.user?.app_metadata?.role === 'super_admin' ? 'Super Admin' : 'Administrator';
     const initial = name[0].toUpperCase();
     const el = document.querySelector('.user-avatar'); if (el) el.textContent = initial;
     const ne = document.querySelector('.user-info strong'); if (ne) ne.textContent = name;
     const re = document.querySelector('.user-info span'); if (re) re.textContent = role;
   }
 
-  async authHeaders() {
+  async authHeaders(isFormData = false) {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    return { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` };
+    const headers = { Authorization: `Bearer ${session?.access_token}` };
+    if (!isFormData) headers['Content-Type'] = 'application/json';
+    return headers;
   }
 
   async fetchSettings() {
@@ -114,11 +116,11 @@ export class AdminSiteSettings {
   async handleImageUpload(file, fieldKey, previewId) {
     if (!file) return null;
     const maxSize = 5 * 1024 * 1024;
-    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'];
-    if (!allowed.includes(file.type)) { this.showToast('Only PNG, JPG, WEBP, SVG allowed.', 'error'); return null; }
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) { this.showToast('Only PNG, JPG, or WEBP files are allowed.', 'error'); return null; }
     if (file.size > maxSize) { this.showToast('File too large. Max 5MB.', 'error'); return null; }
 
-    const fd = new FormData(); fd.append('image', file);
+    const fd = new FormData(); fd.append('file', file);
     try {
       const res = await fetch(this.UPLOAD_URL, { method: 'POST', body: fd, headers: await this.authHeaders(true) });
       if (!res.ok) throw new Error('Upload failed');
@@ -146,13 +148,13 @@ export class AdminSiteSettings {
         <label class="ss-btn-change">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           Change Image
-          <input type="file" accept="image/*" data-field="${fieldKey}" data-preview="${previewId}" style="display:none">
+          <input type="file" accept="image/jpeg,image/png,image/webp" data-field="${fieldKey}" data-preview="${previewId}" style="display:none">
         </label>
         <button class="ss-btn-remove-img" data-field="${fieldKey}" data-preview="${previewId}">✕ Remove</button>
       </div>
     ` : `
       <label class="ss-img-upload-area">
-        <input type="file" accept="image/*" data-field="${fieldKey}" data-preview="${previewId}">
+        <input type="file" accept="image/jpeg,image/png,image/webp" data-field="${fieldKey}" data-preview="${previewId}">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <span>Click to upload</span>
       </label>
@@ -456,13 +458,13 @@ export class AdminSiteSettings {
               <label class="ss-btn-change">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Change Image
-                <input type="file" accept="image/*" data-field="${fieldKey}" data-preview="${pid}" style="display:none">
+                <input type="file" accept="image/jpeg,image/png,image/webp" data-field="${fieldKey}" data-preview="${pid}" style="display:none">
               </label>
               <button class="ss-btn-remove-img" data-field="${fieldKey}" data-preview="${pid}">✕ Remove</button>
             </div>
           ` : `
             <label class="ss-img-upload-area">
-              <input type="file" accept="image/*" data-field="${fieldKey}" data-preview="${pid}">
+              <input type="file" accept="image/jpeg,image/png,image/webp" data-field="${fieldKey}" data-preview="${pid}">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <span>Click to upload</span>
             </label>
@@ -506,8 +508,8 @@ export class AdminSiteSettings {
       <div class="ss-card">
         <div class="ss-card-h"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg> Logo & Favicon</div>
         <div class="ss-img-group">
-          ${this.imgField('church','logo','Church Logo <span class="req">*</span>','Recommended: 400 × 120 px, PNG, JPG, WEBP, SVG (Max 2MB)','img-church-logo')}
-          ${this.imgField('church','favicon','Favicon','Recommended: 32 × 32 px, PNG, ICO, SVG (Max 1MB)','img-church-favicon')}
+          ${this.imgField('church','logo','Church Logo <span class="req">*</span>','Recommended: 400 × 120 px, PNG, JPG, or WEBP (Max 5MB)','img-church-logo')}
+          ${this.imgField('church','favicon','Favicon','Recommended: 32 × 32 px, PNG, JPG, or WEBP (Max 5MB)','img-church-favicon')}
         </div>
       </div>
       ${this.saveBar()}
@@ -800,8 +802,7 @@ export class AdminSiteSettings {
         <div class="ss-system-row"><span class="ss-system-label">Last Settings Update</span><span class="ss-system-val">${this.metaInfo.updated_at ? new Date(this.metaInfo.updated_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : now}</span></div>
         <div class="ss-system-row"><span class="ss-system-label">Updated By</span><span class="ss-system-val">${this.metaInfo.updated_by || '—'}</span></div>
         <div class="ss-system-actions">
-          <button class="ss-btn-sys" onclick="if(confirm('Clear cached data?')) this.textContent = 'Done ✓'">Clear Cache</button>
-          <button class="ss-btn-sys" onclick="if(confirm('Create a settings backup?')) this.textContent = 'Backup saved ✓'">Create Backup</button>
+          <span style="font-size:12px;color:#64748b;">Cache clearing and backups are managed by Vercel/Supabase.</span>
         </div>
       </div>
     `;

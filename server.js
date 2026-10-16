@@ -16,6 +16,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Vercel sits behind a reverse proxy. Trusting its first proxy hop makes req.ip
+// usable for rate limiting instead of treating every visitor as the platform.
+app.set('trust proxy', 1);
+
 // Security Headers
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
 const supabaseHost = supabaseUrl ? new URL(supabaseUrl).origin : '';
@@ -78,7 +82,9 @@ app.use(helmet({
 // If CORS_ORIGIN is missing in production, the server refuses to start
 // rather than silently serving with broken/blocked API access.
 // In development, localhost origins are allowed automatically.
-const isProduction = process.env.NODE_ENV === 'production';
+// Vercel sets NODE_ENV itself. APP_ENV keeps local server configuration out of
+// Vite's .env processing, which rejects user-defined NODE_ENV values.
+const isProduction = process.env.NODE_ENV === 'production' || process.env.APP_ENV === 'production';
 
 if (isProduction && !process.env.CORS_ORIGIN) {
   console.error('[FATAL] CORS_ORIGIN environment variable is required in production.');
@@ -176,6 +182,7 @@ function makeRateLimitMiddleware(endpointName) {
 
 app.use(express.json());
 import eventsRoutes from './eventsRoutes.js';
+app.use('/api/events/:id/register', makeRateLimitMiddleware('event-registration'));
 app.use('/api/events', eventsRoutes);
 
 import donationRoutes from './donationRoutes.js';
@@ -193,7 +200,7 @@ import siteSettingsRoutes from './siteSettingsRoutes.js';
 // Apply rate limiting middleware to the specific post endpoint inside contactRoutes
 app.use('/api/contact', makeRateLimitMiddleware('contact'), contactRoutes);
 
-app.use('/api/visitor', visitorRoutes);
+app.use('/api/visitor', makeRateLimitMiddleware('visitor'), visitorRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/sermons', sermonRoutes);

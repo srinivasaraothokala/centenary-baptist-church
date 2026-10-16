@@ -24,7 +24,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     const { title, image_url, category } = req.body;
     const { data, error } = await supabase.from('gallery').insert([{ title, image_url, category }]).select();
     if (error) throw error;
-    await logAudit({ action: 'created', entityType: 'gallery', entityId: data[0].id, entityName: title, ip: req.ip });
+    await logAudit({ action: 'created', entityType: 'gallery', entityId: data[0].id, entityName: title, userEmail: req.user.email, ip: req.ip });
     res.status(201).json(data[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to add gallery item' });
@@ -36,7 +36,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     const { id } = req.params;
     const { error } = await supabase.from('gallery').delete().eq('id', id);
     if (error) throw error;
-    await logAudit({ action: 'deleted', entityType: 'gallery', entityId: id, ip: req.ip });
+    await logAudit({ action: 'deleted', entityType: 'gallery', entityId: id, userEmail: req.user.email, ip: req.ip });
     res.status(200).json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete gallery item' });

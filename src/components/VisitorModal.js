@@ -1,5 +1,6 @@
 import './VisitorModal.css';
 import { visitorService } from '../services/visitorService.js';
+import { escapeHtml } from '../admin/html.js';
 
 export class FirstTimeVisitorModal {
   constructor() {
@@ -241,7 +242,7 @@ export class FirstTimeVisitorModal {
         <div class="vm-success-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
-        <h2>Thank You, ${firstName}!</h2>
+        <h2>Thank You, ${escapeHtml(firstName)}!</h2>
         <p>We're so glad you reached out. Our church team will be happy to connect with you. We look forward to welcoming you to Centenary Baptist Church.</p>
         <button class="vm-btn-close">BACK TO HOME</button>
       </div>

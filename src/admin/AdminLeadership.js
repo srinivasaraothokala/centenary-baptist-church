@@ -103,7 +103,8 @@ export class AdminLeadership {
     // Fetch media files from API
     let files = [];
     try {
-      const res = await fetch(`${API_BASE}/media`);
+      const res = await fetch(`${API_BASE}/media`, { headers: await this.authHeaders() });
+      if (!res.ok) throw new Error('Failed to load media library');
       files = await res.json();
     } catch {
       this.showToast('Failed to load media library.', 'error');
@@ -303,8 +304,8 @@ export class AdminLeadership {
       </div>
 
       <!-- Table -->
-      <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
-        <table style="width:100%;border-collapse:collapse;">
+      <div class="admin-table-scroll admin-leadership-table-wrap" style="background:white;border-radius:12px;border:1px solid #e5e7eb;">
+        <table class="admin-leadership-table" style="width:100%;border-collapse:collapse;">
           <thead>
             <tr style="background:#f8fafc;border-bottom:1px solid #e5e7eb;">
               <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Name</th>
@@ -322,8 +323,8 @@ export class AdminLeadership {
       </div>
 
       <!-- Add/Edit Modal -->
-      <div id="al-modal" style="position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
-        <div style="background:white;border-radius:16px;padding:32px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;position:relative;margin:16px;">
+      <div id="al-modal" class="al-modal-overlay" style="position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+        <div class="al-modal-panel" style="background:white;border-radius:16px;padding:32px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;position:relative;margin:16px;">
           <button id="al-modal-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;padding:4px;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -366,7 +367,7 @@ export class AdminLeadership {
             </div>
 
             <!-- Category + Order (2-col) -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div class="al-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
               <div>
                 <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Category</label>
                 <select name="l-category"
@@ -402,7 +403,7 @@ export class AdminLeadership {
             </div>
 
             <!-- Actions -->
-            <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <div class="al-form-actions" style="display:flex;gap:10px;justify-content:flex-end;">
               <button type="button" id="al-form-cancel" style="padding:10px 20px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#374151;font-size:14px;font-weight:500;cursor:pointer;">Cancel</button>
               <button type="submit" id="al-form-save" style="padding:10px 24px;border-radius:8px;border:none;background:#003F3A;color:white;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#00564f'" onmouseout="this.style.background='#003F3A'">Save Leader</button>
             </div>
@@ -411,8 +412,8 @@ export class AdminLeadership {
       </div>
 
       <!-- Media Picker Modal -->
-      <div id="al-media-picker" style="position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
-        <div style="background:white;border-radius:16px;padding:28px;width:100%;max-width:680px;max-height:80vh;overflow-y:auto;margin:16px;position:relative;">
+      <div id="al-media-picker" class="al-modal-overlay" style="position:fixed;inset:0;z-index:1100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
+        <div class="al-modal-panel" style="background:white;border-radius:16px;padding:28px;width:100%;max-width:680px;max-height:80vh;overflow-y:auto;margin:16px;position:relative;">
           <button id="al-media-picker-close" style="position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>

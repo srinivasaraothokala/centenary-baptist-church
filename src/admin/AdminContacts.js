@@ -1,6 +1,7 @@
 import { API_BASE } from '../apiConfig.js';
 import { supabaseClient } from '../supabaseFrontendClient.js';
 import { AdminLayout } from './AdminLayout.js';
+import { escapeHtml, safeMailto, safeTel } from './html.js';
 import './admin.css';
 
 export class AdminContacts {
@@ -47,7 +48,7 @@ export class AdminContacts {
                 <div class="admin-card-header">
                   <h3>Inbox</h3>
                 </div>
-                <div style="overflow-x: auto;">
+                <div class="admin-table-scroll">
                   <table class="admin-table">
                     <thead>
                       <tr>
@@ -80,24 +81,28 @@ export class AdminContacts {
       return;
     }
 
-    list.innerHTML = [...this.contacts].reverse().map(c => {
+    list.innerHTML = this.contacts.map(c => {
       const initial = c.name ? c.name.charAt(0).toUpperCase() : '?';
+      const name = escapeHtml(c.name);
+      const email = escapeHtml(c.email);
+      const phone = escapeHtml(c.phone);
+      const message = escapeHtml(c.message);
       return `
       <tr>
         <td style="min-width: 200px;">
           <div class="td-primary">
-            <div class="admin-avatar" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">${initial}</div>
+            <div class="admin-avatar" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">${escapeHtml(initial)}</div>
             <div>
-              <div style="margin-bottom: 4px; font-weight: 600;">${c.name}</div>
+              <div style="margin-bottom: 4px; font-weight: 600;">${name}</div>
             </div>
           </div>
         </td>
         <td class="td-secondary" style="min-width: 200px;">
-          <div style="margin-bottom: 4px;">📧 <a href="mailto:${c.email}" style="color: #38bdf8; text-decoration: none;">${c.email}</a></div>
-          <div>📞 <a href="tel:${c.phone}" style="color: #94a3b8; text-decoration: none;">${c.phone}</a></div>
+          <div style="margin-bottom: 4px;">📧 <a href="${safeMailto(c.email)}" style="color: #38bdf8; text-decoration: none;">${email}</a></div>
+          <div>📞 <a href="${safeTel(c.phone)}" style="color: #94a3b8; text-decoration: none;">${phone}</a></div>
         </td>
         <td style="max-width: 400px;">
-          <div style="color: #e2e8f0; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap;">${c.message}</div>
+          <div style="color: #334155; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap;">${message}</div>
         </td>
         <td class="td-secondary" style="min-width: 150px;">
           ${new Date(c.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}

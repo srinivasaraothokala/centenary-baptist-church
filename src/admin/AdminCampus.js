@@ -379,7 +379,7 @@ export class AdminCampus {
             Add Location
           </button>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="admin-table-scroll">
           <table class="ac-table">
             <thead>
               <tr>

@@ -55,11 +55,9 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     if (error) throw error;
 
     await logAudit({
-      action: 'CREATE',
-      entity: 'leadership',
-      entity_id: String(data.id),
-      details: `Added leader: ${name} (${role})`,
-      req
+      action: 'created', entityType: 'leadership', entityId: data.id,
+      entityName: data.name, userEmail: req.user.email, ip: req.ip,
+      details: { role: data.role }
     });
 
     res.status(201).json(data);
@@ -83,11 +81,9 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (error) throw error;
 
     await logAudit({
-      action: 'UPDATE',
-      entity: 'leadership',
-      entity_id: String(req.params.id),
-      details: `Updated leader: ${name} (${role})`,
-      req
+      action: 'updated', entityType: 'leadership', entityId: req.params.id,
+      entityName: data.name, userEmail: req.user.email, ip: req.ip,
+      details: { role: data.role }
     });
 
     res.json(data);
@@ -109,11 +105,9 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
     if (error) throw error;
 
     await logAudit({
-      action: 'DELETE',
-      entity: 'leadership',
-      entity_id: String(req.params.id),
-      details: `Deleted leader: ${existing?.name || 'Unknown'} (${existing?.role || ''})`,
-      req
+      action: 'deleted', entityType: 'leadership', entityId: req.params.id,
+      entityName: existing?.name || 'Unknown', userEmail: req.user.email, ip: req.ip,
+      details: { role: existing?.role || null }
     });
 
     res.json({ success: true });

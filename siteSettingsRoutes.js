@@ -1,7 +1,7 @@
 import express from 'express';
-import { createClient } from '@supabase/supabase-js';
 import { supabase } from './supabaseClient.js';
 import { requireAuth, requireAdmin, requireSuperAdmin } from './authMiddleware.js';
+import { logAudit } from './logAudit.js';
 const router = express.Router();
 
 // ── GET /api/settings (public — website reads settings) ─────────────────────
@@ -43,6 +43,7 @@ router.put('/', requireAuth, requireAdmin, requireSuperAdmin, async (req, res) =
       .single();
 
     if (error) throw error;
+    await logAudit({ action: 'updated', entityType: 'settings', entityId: '1', entityName: 'All site settings', userEmail: req.user.email, ip: req.ip });
     res.json({ success: true, updated_at: data.updated_at, updated_by: data.updated_by });
   } catch (err) {
     console.error('Settings update error:', err);
@@ -84,6 +85,7 @@ router.patch('/:section', requireAuth, requireAdmin, requireSuperAdmin, async (r
       .single();
 
     if (error) throw error;
+    await logAudit({ action: 'updated', entityType: 'settings', entityId: '1', entityName: section, userEmail: req.user.email, ip: req.ip });
     res.json({ success: true, updated_at: data.updated_at, updated_by: data.updated_by });
   } catch (err) {
     console.error('Section update error:', err);

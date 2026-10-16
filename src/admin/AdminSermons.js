@@ -442,6 +442,36 @@ export class AdminSermons {
   }
 
   bindGlobalEvents() {
+    const cmsLayout = this.container.querySelector('.cms-layout');
+    const menuToggle = this.container.querySelector('#cms-menu-toggle');
+    const sidebarBackdrop = this.container.querySelector('#cms-sidebar-backdrop');
+    const setSidebarOpen = (open) => {
+      cmsLayout?.classList.toggle('cms-sidebar-open', open);
+      menuToggle?.setAttribute('aria-expanded', String(open));
+      menuToggle?.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    };
+
+    menuToggle?.addEventListener('click', () => {
+      setSidebarOpen(!cmsLayout?.classList.contains('cms-sidebar-open'));
+    });
+    sidebarBackdrop?.addEventListener('click', () => setSidebarOpen(false));
+    this.container.querySelectorAll('.cms-nav a').forEach(link => {
+      link.addEventListener('click', () => setSidebarOpen(false));
+    });
+
+    if (!AdminSermons.mobileNavigationBound) {
+      AdminSermons.mobileNavigationBound = true;
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        const layout = document.querySelector('.cms-layout');
+        if (!layout) return;
+        layout.classList.remove('cms-sidebar-open');
+        const toggle = document.getElementById('cms-menu-toggle');
+        toggle?.setAttribute('aria-expanded', 'false');
+        toggle?.setAttribute('aria-label', 'Open navigation');
+      });
+    }
+
     document.getElementById('btn-add-video').addEventListener('click', () => this.openDrawer());
     document.getElementById('btn-close-drawer').addEventListener('click', () => this.closeDrawer());
     document.getElementById('drawer-overlay').addEventListener('click', () => this.closeDrawer());
@@ -501,7 +531,7 @@ export class AdminSermons {
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); }
         
-        .cms-layout { display: flex; height: 100vh; overflow: hidden; }
+        .cms-layout { display: flex; min-width: 0; height: 100vh; overflow: hidden; }
         
         /* Sidebar */
         .cms-sidebar {
@@ -541,7 +571,7 @@ export class AdminSermons {
         .user-meta span { font-size: 11px; opacity: 0.7; }
         
         /* Main Content */
-        .cms-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .cms-main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
         
         /* Header */
         .cms-header {
@@ -598,6 +628,8 @@ export class AdminSermons {
         
         /* Table */
         .table-card { background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow: hidden; }
+        .sermons-table-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .sermons-table-scroll table { min-width: 920px; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th { padding: 16px 20px; font-size: 12px; font-weight: 600; color: var(--text-sec); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; }
         td { padding: 16px 20px; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -680,21 +712,68 @@ export class AdminSermons {
         .toast { position: fixed; bottom: 24px; right: 24px; background: #1f2937; color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; transform: translateY(100px); opacity: 0; transition: 0.3s; z-index: 2000; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .toast.show { transform: translateY(0); opacity: 1; }
 
+        .cms-menu-toggle, .cms-sidebar-backdrop { display: none; }
+
+        @media (max-width: 992px) {
+          .cms-sidebar {
+            position: fixed; top: 0; bottom: 0; left: 0; z-index: 60;
+            width: min(280px, 84vw); height: 100dvh;
+            transform: translateX(-100%); transition: transform .25s ease;
+            box-shadow: 10px 0 30px rgba(0,0,0,.2);
+          }
+          .cms-layout.cms-sidebar-open .cms-sidebar { transform: translateX(0); }
+          .cms-sidebar-backdrop {
+            display: block; position: fixed; inset: 0; z-index: 50;
+            width: 100%; height: 100%; padding: 0; border: 0;
+            background: rgba(3,24,21,.64); cursor: pointer;
+            opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .25s ease, visibility .25s ease;
+          }
+          .cms-layout.cms-sidebar-open .cms-sidebar-backdrop { opacity: 1; pointer-events: auto; visibility: visible; }
+          .cms-menu-toggle {
+            display: inline-flex; width: 40px; height: 40px; flex: 0 0 40px;
+            align-items: center; justify-content: center; border: 1px solid var(--border);
+            border-radius: 8px; color: var(--sidebar-bg); background: white; cursor: pointer;
+          }
+          .cms-menu-toggle svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 2; }
+          .cms-header { gap: 16px; padding: 0 24px; }
+          .cms-content { padding: 24px; }
+        }
+
         @media (max-width: 768px) {
-          .cms-sidebar { width: 60px; }
-          .cms-sidebar-header h1, .cms-sidebar-header span, .cms-nav a text, .user-meta, .cms-sidebar-footer { display: none; }
-          .cms-nav a { justify-content: center; padding: 12px; }
-          .page-title h2 { font-size: 24px; }
-          .stats-grid { grid-template-columns: 1fr 1fr; }
-          .drawer { width: 100%; }
+          .cms-header { height: 60px; gap: 12px; padding: 0 16px; }
+          .search-bar { display: none; }
+          .header-actions { margin-left: auto; gap: 10px; }
+          .notify-icon, .header-profile .user-meta, .header-profile > svg { display: none; }
+          .cms-content { padding: 16px; }
+          .sermons-banner-wrap { margin-bottom: 20px; }
+          .sermons-banner-wrap img { height: 180px; }
+          .sermons-banner-overlay { padding: 20px; align-items: flex-start; flex-direction: column; justify-content: center; gap: 14px; }
+          .sermons-banner-text h2 { font-size: 22px; }
+          .sermons-banner-text p { font-size: 12px; }
+          .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+          .stat-card { padding: 16px; }
+          .stat-num { font-size: 28px; }
+          .filter-bar { flex-wrap: wrap; gap: 10px; }
+          .filter-bar > div, .filter-input { max-width: none !important; width: 100%; }
+          .filter-select, .filter-bar .btn-secondary { flex: 1 1 140px; }
+          .drawer { width: min(430px, 100vw); }
+          .drawer-header { padding: 20px 20px 0; }
+          .drawer-body { padding: 20px; }
+          .drawer-footer { padding: 16px 20px; gap: 12px; }
+        }
+
+        @media (max-width: 500px) {
+          .stats-grid { grid-template-columns: 1fr; }
+          .sermons-banner-wrap img { height: 170px; }
+          .drawer { width: 100vw; }
         }
       </style>
 
       <div class="cms-layout">
         <!-- Sidebar -->
-        <aside class="cms-sidebar">
+        <aside class="cms-sidebar" id="cms-sidebar" aria-label="Admin navigation">
           <div class="cms-sidebar-header">
-            <img src="/images/cbc-logo.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/40'">
+            <img src="/images/cbc-logo-header.png" alt="Logo">
             <div>
               <h1>Centenary Admin</h1>
               <span>Content Management System</span>
@@ -722,10 +801,14 @@ export class AdminSermons {
             <svg style="margin-left:auto; color:rgba(255,255,255,0.5); cursor:pointer;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           </div>
         </aside>
+        <button type="button" class="cms-sidebar-backdrop" id="cms-sidebar-backdrop" aria-label="Close navigation" tabindex="-1"></button>
 
         <!-- Main Content -->
         <main class="cms-main">
           <header class="cms-header">
+            <button type="button" class="cms-menu-toggle" id="cms-menu-toggle" aria-label="Open navigation" aria-controls="cms-sidebar" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
             <div class="search-bar">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
               <input type="text" placeholder="Search sermons, videos...">
@@ -818,6 +901,7 @@ export class AdminSermons {
             </div>
 
             <div class="table-card">
+              <div class="sermons-table-scroll">
               <table>
                 <thead>
                   <tr>
@@ -835,6 +919,7 @@ export class AdminSermons {
                   <!-- JS rows -->
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         </main>

@@ -77,7 +77,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       }
       throw error;
     }
-    await logAudit({ action: 'created', entityType: 'ministry', entityId: data[0].id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'created', entityType: 'ministry', entityId: data[0].id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.status(201).json(data[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create ministry' });
@@ -112,7 +112,7 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       .select();
     if (error) throw error;
     if (!data || data.length === 0) return res.status(404).json({ error: 'Ministry not found' });
-    await logAudit({ action: 'updated', entityType: 'ministry', entityId: req.params.id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'updated', entityType: 'ministry', entityId: req.params.id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.json(data[0]);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update ministry' });
@@ -128,6 +128,7 @@ router.patch('/reorder', requireAuth, requireAdmin, async (req, res) => {
       supabase.from('ministries').update({ sort_order }).eq('id', id)
     );
     await Promise.all(promises);
+    await logAudit({ action: 'updated', entityType: 'ministry', entityName: 'Ministry order', userEmail: req.user.email, ip: req.ip, details: { reordered: updates.length } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to reorder ministries' });
@@ -144,7 +145,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
       .select();
     if (error) throw error;
     if (!data || data.length === 0) return res.status(404).json({ error: 'Ministry not found' });
-    await logAudit({ action: 'deleted', entityType: 'ministry', entityId: req.params.id, entityName: data[0].title, ip: req.ip });
+    await logAudit({ action: 'deleted', entityType: 'ministry', entityId: req.params.id, entityName: data[0].title, userEmail: req.user.email, ip: req.ip });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete ministry' });
