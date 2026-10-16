@@ -43,26 +43,98 @@ export class AdminLogin {
 
   render() {
     const html = `
-      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f3f4f6; font-family: 'Inter', sans-serif;">
-        <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center;">
-          <img src="/images/cbc-logo-header.png" alt="Centenary Baptist Church" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px;" onerror="this.style.display='none'">
-          <h2 style="color: var(--primary-green); margin-bottom: 8px; font-family: 'Playfair Display', serif;">Admin Login</h2>
-          <p style="color: #6b7280; font-size: 14px; margin-bottom: 24px;">Please sign in to access the CMS.</p>
-          
-          <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
-            <div>
-              <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">Email Address</label>
-              <input type="email" name="email" required style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-            </div>
-            <div>
-              <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">Password</label>
-              <input type="password" name="password" required style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-            </div>
-            <button type="submit" style="width: 100%; padding: 12px; background: var(--primary-green); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background 0.2s;">Login</button>
-          </form>
-          <div style="margin-top: 20px; font-size: 13px;">
-            <a href="#/" style="color: var(--secondary-gold); text-decoration: none;">&larr; Back to Website</a>
+      <div style="
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #042e29 0%, #063b35 60%, #0a5247 100%);
+        font-family: 'Inter', sans-serif;
+        padding: 24px;
+        box-sizing: border-box;
+      ">
+        <div style="
+          background: white;
+          padding: 48px 40px 40px;
+          border-radius: 20px;
+          box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+          width: 100%;
+          max-width: 420px;
+          text-align: center;
+          box-sizing: border-box;
+        ">
+
+          <!-- Church Seal Logo -->
+          <div style="margin-bottom: 20px;">
+            <img
+              src="/new-logo.png"
+              alt="Centenary Baptist Church"
+              style="width: 88px; height: 88px; object-fit: contain; display: block; margin: 0 auto;"
+              onerror="this.style.display='none'"
+            >
           </div>
+
+          <!-- Title -->
+          <h2 style="
+            color: #063b35;
+            margin: 0 0 4px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+          ">Admin Login</h2>
+          <p style="color: #6b7280; font-size: 13.5px; margin: 0 0 28px; line-height: 1.5;">
+            Please sign in to access the CMS.
+          </p>
+
+          <!-- Divider -->
+          <div style="height: 1px; background: #f0f0f0; margin-bottom: 28px;"></div>
+
+          <!-- Form -->
+          <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 18px; text-align: left;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="admin@cbcsecbad.in"
+                style="width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; box-sizing: border-box; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#063b35'"
+                onblur="this.style.borderColor='#d1d5db'"
+              >
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Password</label>
+              <input
+                type="password"
+                name="password"
+                required
+                placeholder="••••••••"
+                style="width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; outline: none; box-sizing: border-box; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#063b35'"
+                onblur="this.style.borderColor='#d1d5db'"
+              >
+            </div>
+            <button
+              type="submit"
+              style="width: 100%; padding: 13px; background: #063b35; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 4px; font-family: 'Inter', sans-serif; letter-spacing: 0.02em; transition: background 0.2s;"
+              onmouseover="this.style.background='#0a5247'"
+              onmouseout="this.style.background='#063b35'"
+            >Login</button>
+          </form>
+
+          <!-- Back link -->
+          <div style="margin-top: 24px; font-size: 13px;">
+            <a href="#/" style="color: #b6893f; text-decoration: none; font-weight: 500;">&larr; Back to Website</a>
+          </div>
+
+          <!-- Footer motto -->
+          <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+            <p style="color: #9ca3af; font-size: 11px; font-style: italic; margin: 0; font-family: 'Playfair Display', serif;">
+              &ldquo;We Preach Christ Crucified&rdquo; &mdash; 1 Cor. 1:23
+            </p>
+          </div>
+
         </div>
       </div>
     `;
